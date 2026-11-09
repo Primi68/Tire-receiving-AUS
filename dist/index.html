@@ -76,14 +76,14 @@
           </div>
           <div class="search-field">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>
-            <input id="recordSearch" type="search" placeholder="타이어, 도크, 트레일러 검색" autocomplete="off" />
+            <input id="recordSearch" type="search" aria-label="검수 기록 검색" placeholder="타이어, 도크, 트레일러 검색" autocomplete="off" />
           </div>
           <div class="filter-row" id="recordFilters" aria-label="기록 상태 필터">
-            <button class="filter-chip is-active" type="button" data-filter="all">전체</button>
-            <button class="filter-chip" type="button" data-filter="complete">완료</button>
-            <button class="filter-chip" type="button" data-filter="attention">차이 있음</button>
-            <button class="filter-chip" type="button" data-filter="pending">Pending</button>
-            <button class="filter-chip" type="button" data-filter="partial">부분 입고</button>
+            <button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">전체</button>
+            <button class="filter-chip" type="button" data-filter="complete" aria-pressed="false">완료</button>
+            <button class="filter-chip" type="button" data-filter="attention" aria-pressed="false">차이 있음</button>
+            <button class="filter-chip" type="button" data-filter="pending" aria-pressed="false">Pending</button>
+            <button class="filter-chip" type="button" data-filter="partial" aria-pressed="false">부분 입고</button>
           </div>
           <div id="allRecords" class="record-list record-list-spaced"></div>
         </section>
@@ -101,14 +101,14 @@
           <p class="page-description">타이어와 랙 색상 조합별 적재량을 관리합니다. 검수 중 바꾼 값은 원할 때만 프리셋에 저장됩니다.</p>
           <div class="search-field">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>
-            <input id="tireSearch" type="search" placeholder="타이어 이름 또는 별칭 검색" autocomplete="off" />
+            <input id="tireSearch" type="search" aria-label="타이어 마스터 검색" placeholder="타이어 이름 또는 별칭 검색" autocomplete="off" />
           </div>
           <div id="tireMasterList" class="tire-master-list"></div>
         </section>
       </main>
 
       <nav class="bottom-nav" aria-label="주 메뉴">
-        <button class="nav-item is-active" type="button" data-nav="today">
+        <button class="nav-item is-active" type="button" data-nav="today" aria-current="page">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4Z" /><path d="M9 20v-6h6v6" /></svg>
           <span>오늘</span>
         </button>
@@ -128,7 +128,7 @@
 
     <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
 
-    <section class="bottom-sheet inspection-sheet" id="inspectionSheet" role="dialog" aria-modal="true" aria-labelledby="inspectionTitle" hidden>
+    <section class="bottom-sheet inspection-sheet" id="inspectionSheet" role="dialog" aria-modal="true" aria-labelledby="inspectionTitle" tabindex="-1" hidden>
       <div class="sheet-handle" aria-hidden="true"></div>
       <header class="sheet-header">
         <button class="icon-button sheet-back" id="inspectionBackButton" type="button" aria-label="이전" hidden>
@@ -146,7 +146,7 @@
       <div class="sheet-body" id="tireSelectionStep">
         <div class="search-field sticky-search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>
-          <input id="inspectionTireSearch" type="search" placeholder="타이어 이름 검색" autocomplete="off" />
+          <input id="inspectionTireSearch" type="search" aria-label="검수할 타이어 검색" placeholder="타이어 이름 검색" autocomplete="off" />
         </div>
         <div id="inspectionTireList" class="selection-list"></div>
       </div>
@@ -163,10 +163,10 @@
         <fieldset class="form-block color-fieldset">
           <legend>랙 색상</legend>
           <div class="rack-toggle">
-            <button class="rack-option rack-blue" type="button" data-rack-color="blue">
+            <button class="rack-option rack-blue" type="button" data-rack-color="blue" aria-pressed="false">
               <span class="rack-swatch"></span><span>Blue</span><small id="bluePresetCaption">프리셋 없음</small>
             </button>
-            <button class="rack-option rack-orange" type="button" data-rack-color="orange">
+            <button class="rack-option rack-orange" type="button" data-rack-color="orange" aria-pressed="false">
               <span class="rack-swatch"></span><span>Orange</span><small id="orangePresetCaption">프리셋 없음</small>
             </button>
           </div>
@@ -196,9 +196,9 @@
             <label>
               <span>4랙 묶음</span>
               <div class="stepper">
-                <button type="button" data-step-target="groupCountInput" data-step="-1">−</button>
+                <button type="button" data-step-target="groupCountInput" data-step="-1" aria-label="4랙 묶음 수 감소">−</button>
                 <input id="groupCountInput" type="number" inputmode="numeric" min="0" step="1" required />
-                <button type="button" data-step-target="groupCountInput" data-step="1">+</button>
+                <button type="button" data-step-target="groupCountInput" data-step="1" aria-label="4랙 묶음 수 증가">+</button>
               </div>
             </label>
             <label>
@@ -229,6 +229,7 @@
               <label><span>상태</span>
                 <select id="statusInput">
                   <option value="complete">완료</option>
+                  <option value="in_progress">검수 중</option>
                   <option value="pending">Pending</option>
                   <option value="partial">부분 입고</option>
                 </select>
@@ -245,13 +246,13 @@
         </details>
 
         <div class="sheet-actions">
-          <button class="secondary-button" id="saveAdjustedButton" type="submit">현재 값으로 저장</button>
+          <button class="secondary-button" id="saveAdjustedButton" type="submit" hidden>수정값 저장</button>
           <button class="primary-button" id="confirmExpectedButton" type="button">맞음 · <span id="confirmExpectedQty">0</span> EA</button>
         </div>
       </form>
     </section>
 
-    <section class="bottom-sheet" id="masterSheet" role="dialog" aria-modal="true" aria-labelledby="masterSheetTitle" hidden>
+    <section class="bottom-sheet" id="masterSheet" role="dialog" aria-modal="true" aria-labelledby="masterSheetTitle" tabindex="-1" hidden>
       <div class="sheet-handle" aria-hidden="true"></div>
       <header class="sheet-header">
         <div>
@@ -291,7 +292,7 @@
       </form>
     </section>
 
-    <section class="bottom-sheet compact-sheet" id="recordSheet" role="dialog" aria-modal="true" aria-labelledby="recordSheetTitle" hidden>
+    <section class="bottom-sheet compact-sheet" id="recordSheet" role="dialog" aria-modal="true" aria-labelledby="recordSheetTitle" tabindex="-1" hidden>
       <div class="sheet-handle" aria-hidden="true"></div>
       <header class="sheet-header">
         <div>
@@ -305,7 +306,7 @@
       <div class="sheet-body" id="recordDetailBody"></div>
     </section>
 
-    <section class="bottom-sheet compact-sheet" id="dataSheet" role="dialog" aria-modal="true" aria-labelledby="dataSheetTitle" hidden>
+    <section class="bottom-sheet compact-sheet" id="dataSheet" role="dialog" aria-modal="true" aria-labelledby="dataSheetTitle" tabindex="-1" hidden>
       <div class="sheet-handle" aria-hidden="true"></div>
       <header class="sheet-header">
         <div><p class="eyebrow">LOCAL DATA</p><h2 id="dataSheetTitle">데이터 관리</h2></div>

@@ -4,7 +4,7 @@ const STORAGE_KEYS = {
 };
 
 const COLOR_LABELS = { blue: "Blue", orange: "Orange" };
-const STATUS_LABELS = { complete: "완료", pending: "Pending", partial: "부분 입고" };
+const STATUS_LABELS = { complete: "완료", in_progress: "검수 중", pending: "Pending", partial: "부분 입고" };
 
 const SEED_TIRES = [
   {
@@ -125,10 +125,16 @@ let tires = loadJson(STORAGE_KEYS.tires, null);
 let records = loadJson(STORAGE_KEYS.records, []);
 let currentRecordFilter = "all";
 let activeRecordId = null;
+let editingRecordId = null;
+let lastFocusedElement = null;
 let toastTimer = null;
 let inspection = createEmptyInspection();
 
-if (!Array.isArray(tires) || tires.length === 0) {
+if (tires === null) {
+  tires = structuredCloneSafe(SEED_TIRES);
+  persistTires();
+}
+if (!Array.isArray(tires)) {
   tires = structuredCloneSafe(SEED_TIRES);
   persistTires();
 }
@@ -182,6 +188,7 @@ const elements = {
   remainingQtyDisplay: document.querySelector("#remainingQtyDisplay"),
   noteInput: document.querySelector("#noteInput"),
   confirmExpectedQty: document.querySelector("#confirmExpectedQty"),
+  saveAdjustedButton: document.querySelector("#saveAdjustedButton"),
   masterSheet: document.querySelector("#masterSheet"),
   masterForm: document.querySelector("#masterForm"),
   masterSheetTitle: document.querySelector("#masterSheetTitle"),
@@ -233,10 +240,11 @@ function bindEvents() {
   document.querySelector("#addTireButton").addEventListener("click", () => openMasterEditor());
   document.querySelector("#dataMenuButton").addEventListener("click", () => openSheet(elements.dataSheet));
 
-  document.querySelectorAll("[data-close-sheet]").forEach((button) => button.addEventListener("click", closeSheets));
-  elements.sheetBackdrop.addEventListener("click", closeSheets);
+  document.querySelectorAll("[data-close-sheet]").forEach((button) => button.addEventListener("click", () => closeSheets()));
+  elements.sheetBackdrop.addEventListener("click", () => closeSheets());
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !elements.sheetBackdrop.hidden) closeSheets();
+    if (event.key === "Tab" && !elements.sheetBackdrop.hidden) trapSheetFocus(event);
   });
 
   elements.recordSearch.addEventListener("input", renderRecords);
@@ -247,7 +255,11 @@ function bindEvents() {
     const button = event.target.closest("[data-filter]");
     if (!button) return;
     currentRecordFilter = button.dataset.filter;
-    document.querySelectorAll("#recordFilters [data-filter]").forEach((item) => item.classList.toggle("is-active", item === button));
+    document.querySelectorAll("#recordFilters [data-filter]").forEach((item) => {
+      const selected = item === button;
+      item.classList.toggle("is-active", selected);
+      item.setAttribute("aria-pressed", String(selected));
+    });
     renderRecords();
   });
 
@@ -288,7 +300,10 @@ function bindEvents() {
     });
   });
   elements.directTotalInput.addEventListener("input", syncInspectionFromInputs);
-  elements.statusInput.addEventListener("change", updatePartialFields);
+  elements.statusInput.addEventListener("change", () => {
+    updatePartialFields();
+    updateInspectionActionButtons();
+  });
   elements.receivedQtyInput.addEventListener("input", updatePartialFields);
 
   document.querySelector("#confirmExpectedButton").addEventListener("click", () => saveInspection(true));
@@ -324,7 +339,12 @@ function renderAll() {
 
 function setView(viewName) {
   document.querySelectorAll(".view").forEach((view) => view.classList.toggle("is-active", view.dataset.view === viewName));
-  document.querySelectorAll("[data-nav]").forEach((button) => button.classList.toggle("is-active", button.dataset.nav === viewName));
+  document.querySelectorAll("[data-nav]").forEach((button) => {
+    const selected = button.dataset.nav === viewName;
+    button.classList.toggle("is-active", selected);
+    if (selected) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
   elements.appMain.focus({ preventScroll: true });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -425,6 +445,7 @@ function emptyStateTemplate(title, description) {
 
 function startInspection() {
   inspection = createEmptyInspection();
+  editingRecordId = null;
   elements.inspectionTireSearch.value = "";
   elements.inspectionDateInput.value = todayIso();
   elements.statusInput.value = "complete";
@@ -507,7 +528,11 @@ function loadInspectionPreset() {
 function renderInspectionState() {
   const tire = getInspectionTire();
   if (!tire) return;
-  document.querySelectorAll("[data-rack-color]").forEach((button) => button.classList.toggle("is-selected", button.dataset.rackColor === inspection.color));
+  document.querySelectorAll("[data-rack-color]").forEach((button) => {
+    const selected = button.dataset.rackColor === inspection.color;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
   elements.qtyPerRackInput.value = inspection.qtyPerRack || "";
   elements.groupCountInput.value = inspection.groupCount;
   elements.extraQtyInput.value = inspection.extraQty;
@@ -518,6 +543,7 @@ function renderInspectionState() {
   elements.savePresetOption.hidden = false;
   updateInspectionCalculation();
   updatePartialFields();
+  updateInspectionActionButtons();
 }
 
 function updatePresetCaptions(tire) {
@@ -556,6 +582,15 @@ function updateInspectionCalculation() {
   elements.confirmExpectedQty.textContent = formatNumber(inspection.expectedQty);
   document.querySelector("#toggleEditButton").textContent = inspection.editOpen ? "닫기" : "수정";
   updatePartialFields();
+  updateInspectionActionButtons();
+}
+
+function updateInspectionActionButtons() {
+  const difference = getInspectionActual() - inspection.expectedQty;
+  const needsAdjustedSave = inspection.editOpen || difference !== 0 || elements.statusInput.value !== "complete" || Boolean(editingRecordId);
+  elements.saveAdjustedButton.hidden = !needsAdjustedSave;
+  elements.saveAdjustedButton.textContent = editingRecordId ? "변경 내용 저장" : "현재 값으로 저장";
+  document.querySelector("#confirmExpectedButton").hidden = elements.statusInput.value !== "complete";
 }
 
 function updatePartialFields() {
@@ -596,9 +631,11 @@ function saveInspection(useExpected) {
   const status = elements.statusInput.value;
   const received = status === "partial" ? Math.max(0, numberValue(elements.receivedQtyInput.value)) : 0;
 
+  const existingRecord = editingRecordId ? records.find((item) => item.id === editingRecordId) : null;
   const record = {
-    id: createId("record"),
-    createdAt: new Date().toISOString(),
+    id: existingRecord?.id || createId("record"),
+    createdAt: existingRecord?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     date: elements.inspectionDateInput.value || todayIso(),
     tireId: tire.id,
     tireName: tire.name,
@@ -619,20 +656,30 @@ function saveInspection(useExpected) {
     note: elements.noteInput.value.trim(),
   };
 
-  records.push(record);
-  persistRecords();
-
   if (elements.savePresetCheckbox.checked) {
-    tire.presets = tire.presets || {};
-    tire.presets[inspection.color] = { qtyPerRack: inspection.qtyPerRack };
-    tire.defaultColor = inspection.color;
-    persistTires();
+    const nextTires = structuredCloneSafe(tires);
+    const nextTire = nextTires.find((item) => item.id === tire.id);
+    nextTire.presets = nextTire.presets || {};
+    nextTire.presets[inspection.color] = { qtyPerRack: inspection.qtyPerRack };
+    nextTire.defaultColor = inspection.color;
+    if (!saveJson(STORAGE_KEYS.tires, nextTires)) return;
+    tires = nextTires;
   }
 
-  closeSheets();
+  const nextRecords = existingRecord
+    ? records.map((item) => item.id === record.id ? record : item)
+    : [...records, record];
+  if (!saveJson(STORAGE_KEYS.records, nextRecords)) return;
+  records = nextRecords;
+
+  const wasEditing = Boolean(existingRecord);
+  inspection = createEmptyInspection();
+  editingRecordId = null;
+  closeSheets(true);
   renderAll();
   setView("today");
-  showToast(difference === 0 ? `${tire.name} · ${formatNumber(actual)} EA 검수 완료` : `실측 차이 ${signedNumber(difference)} EA로 저장했습니다.`);
+  if (wasEditing) showToast("검수 기록을 수정했습니다.");
+  else showToast(difference === 0 ? `${tire.name} · ${formatNumber(actual)} EA 검수 완료` : `실측 차이 ${signedNumber(difference)} EA로 저장했습니다.`);
 }
 
 function openMasterEditor(tireId = "") {
@@ -716,10 +763,12 @@ function saveMasterTire(event) {
     presets,
   };
 
-  if (existing) Object.assign(existing, tire);
-  else tires.push(tire);
-  persistTires();
-  closeSheets();
+  const nextTires = existing
+    ? tires.map((item) => item.id === tire.id ? tire : item)
+    : [...tires, tire];
+  if (!saveJson(STORAGE_KEYS.tires, nextTires)) return;
+  tires = nextTires;
+  closeSheets(true);
   renderTireMaster();
   showToast(existing ? "프리셋을 수정했습니다." : "새 타이어를 추가했습니다.");
 }
@@ -729,9 +778,10 @@ function deleteMasterTire() {
   const tire = tires.find((item) => item.id === id);
   if (!tire) return;
   if (!window.confirm(`${tire.name} 프리셋을 삭제할까요? 기존 검수 기록은 유지됩니다.`)) return;
-  tires = tires.filter((item) => item.id !== id);
-  persistTires();
-  closeSheets();
+  const nextTires = tires.filter((item) => item.id !== id);
+  if (!saveJson(STORAGE_KEYS.tires, nextTires)) return;
+  tires = nextTires;
+  closeSheets(true);
   renderTireMaster();
   showToast("타이어 프리셋을 삭제했습니다.");
 }
@@ -771,6 +821,7 @@ function openRecordDetail(recordId) {
     </div>
     <div class="record-detail-actions">
       <button class="secondary-button" type="button" data-record-action="delete">기록 삭제</button>
+      <button class="secondary-button" type="button" data-record-action="edit">${record.status === "complete" ? "기록 수정" : "검수 계속"}</button>
       <button class="primary-button" type="button" data-record-action="copy">한 줄 기록 복사</button>
     </div>`;
   openSheet(elements.recordSheet);
@@ -785,14 +836,48 @@ function handleRecordDetailAction(event) {
     const line = `${record.tireName} · ${record.qtyPerRack}/${COLOR_LABELS[record.rackColor]} · ${record.actualQty} · ${STATUS_LABELS[record.status] || record.status}`;
     copyText(line).then(() => showToast("한 줄 기록을 복사했습니다."));
   }
+  if (button.dataset.recordAction === "edit") {
+    editInspectionRecord(record);
+  }
   if (button.dataset.recordAction === "delete") {
     if (!window.confirm(`${record.tireName} 검수 기록을 삭제할까요?`)) return;
-    records = records.filter((item) => item.id !== record.id);
-    persistRecords();
-    closeSheets();
+    const nextRecords = records.filter((item) => item.id !== record.id);
+    if (!saveJson(STORAGE_KEYS.records, nextRecords)) return;
+    records = nextRecords;
+    closeSheets(true);
     renderAll();
     showToast("검수 기록을 삭제했습니다.");
   }
+}
+
+function editInspectionRecord(record) {
+  const tire = tires.find((item) => item.id === record.tireId);
+  if (!tire) {
+    showToast("삭제된 타이어 프리셋은 먼저 다시 등록해주세요.");
+    return;
+  }
+  editingRecordId = record.id;
+  inspection = {
+    tireId: tire.id,
+    color: record.rackColor,
+    qtyPerRack: numberValue(record.qtyPerRack),
+    groupCount: numberValue(record.groupCount),
+    extraQty: numberValue(record.extraQty),
+    directTotal: record.directTotal === null || record.directTotal === undefined ? null : numberValue(record.directTotal),
+    expectedQty: numberValue(record.expectedQty),
+    editOpen: true,
+  };
+  elements.inspectionDateInput.value = record.date || todayIso();
+  elements.statusInput.value = record.status || "complete";
+  elements.dockInput.value = record.dock || "";
+  elements.trailerInput.value = record.trailer || "";
+  elements.noteInput.value = record.note || "";
+  elements.receivedQtyInput.value = record.receivedQty || 0;
+  elements.savePresetCheckbox.checked = false;
+  showInspectionForm();
+  elements.inspectionStepLabel.textContent = "EDIT RECORD";
+  elements.inspectionTitle.textContent = record.status === "complete" ? "검수 기록 수정" : "검수 계속";
+  openSheet(elements.inspectionSheet);
 }
 
 function exportData() {
@@ -819,13 +904,12 @@ async function importData(event) {
   if (!file) return;
   try {
     const data = JSON.parse(await file.text());
-    if (!Array.isArray(data.tires) || !Array.isArray(data.records)) throw new Error("invalid");
+    if (!isValidBackup(data)) throw new Error("invalid");
     if (!window.confirm(`프리셋 ${data.tires.length}개와 기록 ${data.records.length}개로 현재 데이터를 바꿀까요?`)) return;
-    tires = data.tires;
-    records = data.records;
-    persistTires();
-    persistRecords();
-    closeSheets();
+    replaceLocalData(data.tires, data.records);
+    tires = structuredCloneSafe(data.tires);
+    records = structuredCloneSafe(data.records);
+    closeSheets(true);
     renderAll();
     showToast("백업 데이터를 복원했습니다.");
   } catch {
@@ -833,20 +917,96 @@ async function importData(event) {
   }
 }
 
+function isValidBackup(data) {
+  if (!data || !Array.isArray(data.tires) || !Array.isArray(data.records)) return false;
+  const validColors = new Set(["blue", "orange"]);
+  const validStatuses = new Set(["complete", "in_progress", "pending", "partial"]);
+  const tireIds = new Set();
+  for (const tire of data.tires) {
+    if (!tire || typeof tire.id !== "string" || !tire.id || tireIds.has(tire.id)) return false;
+    if (typeof tire.name !== "string" || !tire.name.trim() || !Number.isFinite(Number(tire.expectedQty)) || Number(tire.expectedQty) <= 0) return false;
+    if (!validColors.has(tire.defaultColor) || !tire.presets || typeof tire.presets !== "object") return false;
+    if (!tire.presets[tire.defaultColor]) return false;
+    for (const [color, preset] of Object.entries(tire.presets)) {
+      if (!validColors.has(color) || !preset || !Number.isFinite(Number(preset.qtyPerRack)) || Number(preset.qtyPerRack) <= 0) return false;
+    }
+    if (tire.aliases !== undefined && !Array.isArray(tire.aliases)) return false;
+    tireIds.add(tire.id);
+  }
+  for (const record of data.records) {
+    if (!record || typeof record.id !== "string" || typeof record.tireName !== "string") return false;
+    if (!validColors.has(record.rackColor) || !validStatuses.has(record.status)) return false;
+    for (const field of ["qtyPerRack", "groupCount", "extraQty", "expectedQty", "actualQty", "difference"]) {
+      if (!Number.isFinite(Number(record[field]))) return false;
+    }
+    if (typeof record.date !== "string" || typeof record.formula !== "string") return false;
+  }
+  return true;
+}
+
+function replaceLocalData(nextTires, nextRecords) {
+  const previousTires = localStorage.getItem(STORAGE_KEYS.tires);
+  const previousRecords = localStorage.getItem(STORAGE_KEYS.records);
+  try {
+    localStorage.setItem(STORAGE_KEYS.tires, JSON.stringify(nextTires));
+    localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(nextRecords));
+  } catch (error) {
+    if (previousTires === null) localStorage.removeItem(STORAGE_KEYS.tires);
+    else localStorage.setItem(STORAGE_KEYS.tires, previousTires);
+    if (previousRecords === null) localStorage.removeItem(STORAGE_KEYS.records);
+    else localStorage.setItem(STORAGE_KEYS.records, previousRecords);
+    throw error;
+  }
+}
+
 function openSheet(sheet) {
+  if (elements.sheetBackdrop.hidden) lastFocusedElement = document.activeElement;
   [elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].forEach((item) => {
     if (item !== sheet) item.hidden = true;
   });
   elements.sheetBackdrop.hidden = false;
   sheet.hidden = false;
+  document.querySelector(".app-shell").inert = true;
   document.body.classList.add("sheet-open");
+  setTimeout(() => sheet.focus({ preventScroll: true }), 30);
 }
 
-function closeSheets() {
+function closeSheets(force = false) {
+  if (!force && !elements.inspectionSheet.hidden && inspection.tireId) {
+    if (!window.confirm("작성 중인 검수를 닫을까요? 저장하지 않은 내용은 사라집니다.")) return false;
+  }
   [elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].forEach((sheet) => { sheet.hidden = true; });
   elements.sheetBackdrop.hidden = true;
+  document.querySelector(".app-shell").inert = false;
   document.body.classList.remove("sheet-open");
   activeRecordId = null;
+  if (!force) {
+    inspection = createEmptyInspection();
+    editingRecordId = null;
+  }
+  if (lastFocusedElement?.focus) setTimeout(() => lastFocusedElement.focus({ preventScroll: true }), 20);
+  return true;
+}
+
+function trapSheetFocus(event) {
+  const openSheetElement = [elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].find((sheet) => !sheet.hidden);
+  if (!openSheetElement) return;
+  const focusable = [...openSheetElement.querySelectorAll('button:not([hidden]):not([disabled]), input:not([hidden]):not([disabled]), select:not([hidden]):not([disabled]), textarea:not([hidden]):not([disabled]), summary, [tabindex]:not([tabindex="-1"])')]
+    .filter((item) => item.offsetParent !== null);
+  if (!focusable.length) {
+    event.preventDefault();
+    openSheetElement.focus();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function getInspectionTire() {
@@ -882,11 +1042,11 @@ function formulaText(qtyPerRack, groups, extra, total) {
 }
 
 function persistTires() {
-  saveJson(STORAGE_KEYS.tires, tires);
+  return saveJson(STORAGE_KEYS.tires, tires);
 }
 
 function persistRecords() {
-  saveJson(STORAGE_KEYS.records, records);
+  return saveJson(STORAGE_KEYS.records, records);
 }
 
 function loadJson(key, fallback) {
@@ -901,8 +1061,10 @@ function loadJson(key, fallback) {
 function saveJson(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
+    return true;
   } catch {
     showToast("기기 저장 공간이 부족합니다. 데이터를 백업해주세요.");
+    return false;
   }
 }
 
