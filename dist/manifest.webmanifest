@@ -1,0 +1,18 @@
+{
+  "name": "Tire Receiving",
+  "short_name": "Tire Check",
+  "description": "타이어 언로딩 수량 검수와 랙 프리셋 관리",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f1eb",
+  "theme_color": "#0b1726",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
