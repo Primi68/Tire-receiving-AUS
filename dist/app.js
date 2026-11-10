@@ -5,6 +5,12 @@ const STORAGE_KEYS = {
 
 const COLOR_LABELS = { blue: "Blue", orange: "Orange" };
 const STATUS_LABELS = { complete: "완료", in_progress: "검수 중", pending: "Pending", partial: "부분 입고" };
+const STRIPE_COLORS = ["", "red", "yellow", "green", "white", "blue", "orange", "purple"];
+const STRIPE_LABELS = { "": "없음", red: "빨강", yellow: "노랑", green: "초록", white: "흰색", blue: "파랑", orange: "주황", purple: "보라" };
+const DEFAULT_STRIPES = {
+  "myp-19": ["red", "red", "", ""],
+  "bridgestone-20": ["yellow", "", "", ""],
+};
 
 const SEED_TIRES = [
   {
@@ -12,6 +18,7 @@ const SEED_TIRES = [
     name: 'MYP 19"',
     aliases: ["MY P", "MYP"],
     expectedQty: 975,
+    stripeColors: ["red", "red", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 20 } },
   },
@@ -20,6 +27,7 @@ const SEED_TIRES = [
     name: 'Bridgestone 20"',
     aliases: ["브리지스톤", "브릿지스톤"],
     expectedQty: 966,
+    stripeColors: ["yellow", "", "", ""],
     defaultColor: "orange",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 20 } },
   },
@@ -28,6 +36,7 @@ const SEED_TIRES = [
     name: 'E80 HK Front 20"',
     aliases: ["한국 프런트", "한국 front", "HK F"],
     expectedQty: 756,
+    stripeColors: ["", "", "", ""],
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 20 } },
   },
@@ -36,6 +45,7 @@ const SEED_TIRES = [
     name: 'E80 HK Rear 20"',
     aliases: ["한국 레어", "한국 rear", "HK R"],
     expectedQty: 756,
+    stripeColors: ["", "", "", ""],
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 16 } },
   },
@@ -44,6 +54,7 @@ const SEED_TIRES = [
     name: 'HK Performance Front 21"',
     aliases: ["HK Perf Front", "퍼포먼스 프런트"],
     expectedQty: 500,
+    stripeColors: ["", "", "", ""],
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 20 } },
   },
@@ -52,6 +63,7 @@ const SEED_TIRES = [
     name: 'HK Performance Rear 21"',
     aliases: ["HK Perf Rear", "퍼포먼스 레어"],
     expectedQty: 500,
+    stripeColors: ["", "", "", ""],
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 16 } },
   },
@@ -60,6 +72,7 @@ const SEED_TIRES = [
     name: 'CT P 20"',
     aliases: ["CTP", "CT P"],
     expectedQty: 420,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 20 } },
   },
@@ -68,6 +81,7 @@ const SEED_TIRES = [
     name: 'E80 Continental Front 19"',
     aliases: ["E80 Conti Front", "콘티 프런트"],
     expectedQty: 400,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 20 } },
   },
@@ -76,6 +90,7 @@ const SEED_TIRES = [
     name: 'E80 Continental Rear 19"',
     aliases: ["E80 Conti Rear", "콘티 레어"],
     expectedQty: 400,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 16 } },
   },
@@ -84,6 +99,7 @@ const SEED_TIRES = [
     name: 'Goodyear 18"',
     aliases: ["GY 18", "굿이어 18"],
     expectedQty: 270,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 16 } },
   },
@@ -92,6 +108,7 @@ const SEED_TIRES = [
     name: 'Goodyear 20"',
     aliases: ["GY 20", "굿이어 20"],
     expectedQty: 595,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 20 } },
   },
@@ -100,6 +117,7 @@ const SEED_TIRES = [
     name: 'E41 18" HK',
     aliases: ["E41", "E41 HK"],
     expectedQty: 900,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 } },
   },
@@ -108,6 +126,7 @@ const SEED_TIRES = [
     name: 'W68 Front 18" RT',
     aliases: ["W68 Front", "W68 프런트"],
     expectedQty: 352,
+    stripeColors: ["", "", "", ""],
     defaultColor: "orange",
     presets: { blue: { qtyPerRack: 20 }, orange: { qtyPerRack: 16 } },
   },
@@ -116,6 +135,7 @@ const SEED_TIRES = [
     name: 'W68 Rear 18" RT',
     aliases: ["W68 Rear", "W68 레어"],
     expectedQty: 352,
+    stripeColors: ["", "", "", ""],
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 20 } },
   },
@@ -128,6 +148,8 @@ let activeRecordId = null;
 let editingRecordId = null;
 let lastFocusedElement = null;
 let toastTimer = null;
+let toastReady = false;
+let storageWarningPending = false;
 let inspection = createEmptyInspection();
 
 if (tires === null) {
@@ -141,6 +163,11 @@ if (!Array.isArray(tires)) {
 if (!Array.isArray(records)) {
   records = [];
   persistRecords();
+}
+const tiresWithStripes = tires.map(withNormalizedStripes);
+if (JSON.stringify(tiresWithStripes) !== JSON.stringify(tires)) {
+  tires = tiresWithStripes;
+  persistTires();
 }
 
 const elements = {
@@ -196,6 +223,8 @@ const elements = {
   masterNameInput: document.querySelector("#masterNameInput"),
   masterAliasesInput: document.querySelector("#masterAliasesInput"),
   masterExpectedInput: document.querySelector("#masterExpectedInput"),
+  masterStripePreview: document.querySelector("#masterStripePreview"),
+  masterStripeControls: document.querySelector("#masterStripeControls"),
   masterBlueEnabled: document.querySelector("#masterBlueEnabled"),
   masterBlueQty: document.querySelector("#masterBlueQty"),
   masterBlueFormula: document.querySelector("#masterBlueFormula"),
@@ -214,7 +243,9 @@ const elements = {
   toast: document.querySelector("#toast"),
 };
 
+toastReady = true;
 initialize();
+if (storageWarningPending) showToast("기기 저장 공간이 부족합니다. 데이터를 백업해주세요.");
 
 function initialize() {
   bindEvents();
@@ -319,6 +350,7 @@ function bindEvents() {
   });
   [elements.masterExpectedInput, elements.masterBlueQty, elements.masterOrangeQty].forEach((input) => input.addEventListener("input", updateMasterFormulaPreview));
   [elements.masterBlueEnabled, elements.masterOrangeEnabled].forEach((input) => input.addEventListener("change", updateMasterPresetControls));
+  elements.masterStripeControls.addEventListener("change", updateMasterStripePreview);
   elements.masterForm.addEventListener("submit", saveMasterTire);
   elements.deleteTireButton.addEventListener("click", deleteMasterTire);
 
@@ -430,13 +462,50 @@ function tireMasterTemplate(tire) {
   return `
     <article class="tire-master-card">
       <div class="tire-master-top">
-        <div><h3>${escapeHtml(tire.name)}</h3><p>기본 예상 ${formatNumber(tire.expectedQty)} EA${tire.aliases?.length ? ` · ${escapeHtml(tire.aliases.join(", "))}` : ""}</p></div>
+        <div class="tire-master-identity">${tireStripeIcon(tire)}<div><h3>${escapeHtml(tire.name)}</h3><p>기본 예상 ${formatNumber(tire.expectedQty)} EA${tire.aliases?.length ? ` · ${escapeHtml(tire.aliases.join(", "))}` : ""}</p></div></div>
         <button class="edit-round-button" type="button" data-edit-tire="${escapeHtml(tire.id)}" aria-label="${escapeHtml(tire.name)} 수정">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-.7 4 4-.7L18 8.6 14.4 5Z" /><path d="m12.8 6.6 3.6 3.6" /></svg>
         </button>
       </div>
       ${presetRows || '<p class="record-meta">등록된 랙 프리셋이 없습니다.</p>'}
     </article>`;
+}
+
+function normalizeStripeColors(value, tireId = "") {
+  const fallback = DEFAULT_STRIPES[tireId] || ["", "", "", ""];
+  if (!Array.isArray(value)) return [...fallback];
+  return Array.from({ length: 4 }, (_, index) => STRIPE_COLORS.includes(value[index]) ? value[index] : "");
+}
+
+function withNormalizedStripes(tire) {
+  return { ...tire, stripeColors: normalizeStripeColors(tire.stripeColors, tire.id) };
+}
+
+function tireStripeIcon(tire, extraClass = "") {
+  const colors = normalizeStripeColors(tire?.stripeColors, tire?.id);
+  const painted = colors.filter(Boolean);
+  const label = painted.length
+    ? `타이어 무늬, 위에서부터 ${colors.map((color) => STRIPE_LABELS[color]).join(", ")}`
+    : "타이어 무늬 미설정";
+  const lines = colors.map((color) => `<span class="tire-stripe-line stripe-${color || "none"}"></span>`).join("");
+  return `<span class="tire-stripe-icon ${escapeHtml(extraClass)}" role="img" aria-label="${escapeHtml(label)}">${lines}</span>`;
+}
+
+function renderMasterStripeControls(colors) {
+  const normalized = normalizeStripeColors(colors);
+  elements.masterStripeControls.innerHTML = normalized.map((selected, index) => {
+    const options = STRIPE_COLORS.map((color) => `<option value="${color}" ${color === selected ? "selected" : ""}>${STRIPE_LABELS[color]}</option>`).join("");
+    return `<label><span>${index + 1}번째 줄</span><select data-master-stripe="${index}">${options}</select></label>`;
+  }).join("");
+  updateMasterStripePreview();
+}
+
+function currentMasterStripeColors() {
+  return [...elements.masterStripeControls.querySelectorAll("[data-master-stripe]")].map((select) => select.value);
+}
+
+function updateMasterStripePreview() {
+  elements.masterStripePreview.innerHTML = tireStripeIcon({ stripeColors: currentMasterStripeColors() }, "is-large");
 }
 
 function emptyStateTemplate(title, description) {
@@ -463,7 +532,6 @@ function startInspection() {
   showTireSelection();
   renderInspectionTireList();
   openSheet(elements.inspectionSheet);
-  setTimeout(() => elements.inspectionTireSearch.focus(), 120);
 }
 
 function renderInspectionTireList() {
@@ -473,7 +541,7 @@ function renderInspectionTireList() {
     ? filtered.map((tire) => {
       const preset = tire.presets?.[tire.defaultColor] || Object.values(tire.presets || {})[0];
       const rackText = preset ? `${preset.qtyPerRack}/Rack` : "프리셋 없음";
-      return `<button class="selection-card" type="button" data-select-tire="${escapeHtml(tire.id)}"><span><strong>${escapeHtml(tire.name)}</strong><small>${escapeHtml(COLOR_LABELS[tire.defaultColor] || "")} · ${escapeHtml(rackText)}</small></span><span class="selection-expected">${formatNumber(tire.expectedQty)} EA</span></button>`;
+      return `<button class="selection-card" type="button" data-select-tire="${escapeHtml(tire.id)}">${tireStripeIcon(tire)}<span class="selection-copy"><strong>${escapeHtml(tire.name)}</strong><small>${escapeHtml(COLOR_LABELS[tire.defaultColor] || "")} · ${escapeHtml(rackText)}</small></span><span class="selection-expected">${formatNumber(tire.expectedQty)} EA</span></button>`;
     }).join("")
     : emptyStateTemplate("타이어를 찾지 못했습니다", "프리셋 화면에서 새 타이어를 추가할 수 있습니다.");
 }
@@ -696,6 +764,7 @@ function openMasterEditor(tireId = "") {
   elements.masterNameInput.value = tire?.name || "";
   elements.masterAliasesInput.value = tire?.aliases?.join(", ") || "";
   elements.masterExpectedInput.value = tire?.expectedQty || "";
+  renderMasterStripeControls(tire?.stripeColors || normalizeStripeColors(null, tire?.id));
   elements.masterBlueEnabled.checked = Boolean(tire?.presets?.blue);
   elements.masterBlueQty.value = tire?.presets?.blue?.qtyPerRack || "";
   elements.masterOrangeEnabled.checked = Boolean(tire?.presets?.orange);
@@ -765,6 +834,7 @@ function saveMasterTire(event) {
     name: elements.masterNameInput.value.trim(),
     aliases: elements.masterAliasesInput.value.split(",").map((value) => value.trim()).filter(Boolean),
     expectedQty: numberValue(elements.masterExpectedInput.value),
+    stripeColors: currentMasterStripeColors(),
     defaultColor: presets[elements.masterDefaultColor.value] ? elements.masterDefaultColor.value : Object.keys(presets)[0],
     presets,
   };
@@ -922,8 +992,9 @@ async function restoreBackupJson(text) {
     const data = JSON.parse(text);
     if (!isValidBackup(data)) throw new Error("invalid");
     if (!window.confirm(`프리셋 ${data.tires.length}개와 기록 ${data.records.length}개로 현재 데이터를 바꿀까요?`)) return;
-    replaceLocalData(data.tires, data.records);
-    tires = structuredCloneSafe(data.tires);
+    const restoredTires = data.tires.map(withNormalizedStripes);
+    replaceLocalData(restoredTires, data.records);
+    tires = structuredCloneSafe(restoredTires);
     records = structuredCloneSafe(data.records);
     closeSheets(true);
     renderAll();
@@ -962,6 +1033,7 @@ function isValidBackup(data) {
       if (!validColors.has(color) || !preset || !Number.isFinite(Number(preset.qtyPerRack)) || Number(preset.qtyPerRack) <= 0) return false;
     }
     if (tire.aliases !== undefined && !Array.isArray(tire.aliases)) return false;
+    if (tire.stripeColors !== undefined && (!Array.isArray(tire.stripeColors) || tire.stripeColors.length !== 4 || tire.stripeColors.some((color) => !STRIPE_COLORS.includes(color)))) return false;
     tireIds.add(tire.id);
   }
   for (const record of data.records) {
@@ -1094,7 +1166,8 @@ function saveJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
-    showToast("기기 저장 공간이 부족합니다. 데이터를 백업해주세요.");
+    if (toastReady) showToast("기기 저장 공간이 부족합니다. 데이터를 백업해주세요.");
+    else storageWarningPending = true;
     return false;
   }
 }

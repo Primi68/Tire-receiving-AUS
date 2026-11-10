@@ -532,6 +532,54 @@ main {
   gap: 12px;
 }
 
+.tire-master-identity {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 11px;
+}
+
+.tire-master-identity > div {
+  min-width: 0;
+}
+
+.tire-stripe-icon {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 3px;
+  width: 38px;
+  height: 34px;
+  padding: 6px 5px;
+  border: 1px solid #111820;
+  border-radius: 9px;
+  background: #252c34;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.tire-stripe-icon.is-large {
+  width: 62px;
+  height: 54px;
+  gap: 5px;
+  padding: 9px 8px;
+  border-radius: 13px;
+}
+
+.tire-stripe-line {
+  display: block;
+  min-height: 3px;
+  border-radius: 999px;
+  background: #59616a;
+}
+
+.stripe-red { background: #ef4444; }
+.stripe-yellow { background: #facc15; }
+.stripe-green { background: #22c55e; }
+.stripe-white { background: #f8fafc; box-shadow: inset 0 0 0 1px #cbd5e1; }
+.stripe-blue { background: #3b82f6; }
+.stripe-orange { background: #fb923c; }
+.stripe-purple { background: #a855f7; }
+
 .tire-master-top h3 {
   margin: 0;
   font-size: 16px;
@@ -763,6 +811,11 @@ main {
   display: block;
   font-size: 15px;
   letter-spacing: -0.02em;
+}
+
+.selection-copy {
+  flex: 1;
+  min-width: 0;
 }
 
 .selection-card small {
@@ -1199,6 +1252,60 @@ label small {
 
 .master-form > label {
   display: block;
+}
+
+.tire-stripe-editor {
+  min-width: 0;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.tire-stripe-editor legend {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.tire-stripe-editor legend small {
+  color: #75808b;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.tire-stripe-editor-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tire-stripe-preview {
+  display: grid;
+  flex: 0 0 70px;
+  place-items: center;
+}
+
+.tire-stripe-controls {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.tire-stripe-controls label > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.tire-stripe-controls select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
 }
 
 .preset-editor {

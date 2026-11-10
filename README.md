@@ -13,6 +13,15 @@
 
 최신 버전이 위에 오도록 기록합니다.
 
+### 0.1.1 — 목록 선택과 타이어 무늬
+
+- 새 검수를 열 때 검색창에 자동으로 커서를 두지 않도록 변경
+- 키보드는 검색창을 직접 눌렀을 때만 표시
+- 타이어 전체 목록을 바로 보고 한 번에 선택하는 현장 흐름 유지
+- 타이어 목록과 마스터에 위에서 아래로 읽는 4줄 무늬 아이콘 추가
+- 각 줄을 없음·빨강·노랑·초록·흰색·파랑·주황·보라 중 하나로 편집 가능
+- MYP는 위 두 줄 빨강, Bridgestone은 맨 위 한 줄 노랑으로 초기 설정
+
 ### 0.1.0 — 첫 Android MVP
 
 - Blue/Orange 랙 프리셋과 2×2 랙 묶음 자동 계산 추가
@@ -28,13 +37,13 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 태그 | `v0.1.0-mvp` |
-| APK | `Tire-Receiving-0.1.0-preview.apk` |
+| 태그 | `v0.1.1-mvp` |
+| APK | `Tire-Receiving-0.1.1-preview.apk` |
 | Package | `com.primi.tirereceiving` |
-| Version | `0.1.0` (`versionCode 1`) |
+| Version | `0.1.1` (`versionCode 2`) |
 | 최소 Android | Android 8.0 / API 26 |
 
-자세한 내용은 [게시된 v0.1.0-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.1.0-mvp)와 [0.1.0 릴리스 노트](docs/releases/0.1.0.md)를 참고하세요.
+자세한 내용은 [게시된 v0.1.1-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.1.1-mvp)와 [0.1.1 릴리스 노트](docs/releases/0.1.1.md)를 참고하세요.
 
 ## 바로 사용하기
 
@@ -42,11 +51,11 @@
 - 비공개 GitHub 저장소: <https://github.com/Primi68/Tire-receiving-AUS>
 - APK 설치와 업데이트: [docs/INSTALL.md](docs/INSTALL.md)
 
-게시된 `v0.1.0-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
+게시된 `v0.1.1-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
 
 ## 현장 사용 흐름
 
-1. 앱에서 **검수 시작**을 누르고 타이어를 검색합니다. 한글·영문 별칭도 검색할 수 있습니다.
+1. 앱에서 **검수 시작**을 누르고 바로 표시되는 목록에서 타이어를 고릅니다. 필요할 때만 검색창을 눌러 한글·영문 별칭으로 검색합니다.
 2. Blue 또는 Orange 랙을 선택합니다. 해당 타이어와 색상에 저장된 랙당 적재량이 자동으로 적용됩니다.
 3. 2×2로 묶인 랙 수를 **묶음 수**에 입력하고, 묶음 밖 타이어를 **추가 수량**에 입력합니다.
 4. 앱이 `랙당 적재량 × 4 × 묶음 수 + 추가 수량`을 계산하고 예상 수량과 차이를 표시합니다.
@@ -59,6 +68,8 @@
 ## 초기 타이어 14종
 
 아래 값은 최초 실행 시 생성되는 기본값입니다. 타이어 마스터에서 예상 수량, 기본 색상, Blue/Orange 사용 여부와 랙당 적재량을 수정할 수 있습니다.
+
+목록의 4줄 아이콘은 실제 타이어의 식별용 색 띠를 위에서 아래 순서로 표시합니다. 초기값은 MYP가 빨강·빨강·없음·없음, Bridgestone이 노랑·없음·없음·없음이며 나머지는 미설정입니다. **Tire presets**에서 네 줄을 각각 바꿀 수 있습니다.
 
 | 타이어 | 기본 적재 형태 | 기본 계산식 | 예상 수량 | 추가 프리셋 |
 | --- | --- | ---: | ---: | --- |
@@ -110,8 +121,9 @@ Release 빌드는 고정 서명 환경 변수가 필요합니다. 서명 키 관
 - [개발·빌드·서명·릴리스](docs/DEVELOPMENT.md)
 - [로컬 데이터와 개인정보](docs/PRIVACY.md)
 - [자동/수동 검증 체크리스트](docs/VERIFICATION.md)
+- [0.1.1 릴리스 노트](docs/releases/0.1.1.md)
 - [0.1.0 릴리스 노트](docs/releases/0.1.0.md)
 
 ## 현재 범위
 
-0.1.0은 한 작업자가 현장에서 빠르게 수량을 확인하고 기록하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.
+0.1.1은 한 작업자가 현장에서 빠르게 수량을 확인하고 기록하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.

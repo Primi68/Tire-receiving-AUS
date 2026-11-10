@@ -8,29 +8,30 @@ const activity = await readFile(new URL("../app/src/main/java/com/primi/tirerece
 
 const seedSource = app.match(/const SEED_TIRES = (\[[\s\S]*?\n\]);/)?.[1];
 assert.ok(seedSource, "Initial tire list must be present");
+assert.doesNotMatch(app, /inspectionTireSearch\.focus\s*\(/, "New inspections must not auto-focus search and open the keyboard");
 const seedTires = Function(`"use strict"; return ${seedSource}`)();
 
 const expectedTires = [
-  ["myp-19", 'MYP 19"', 975, "blue", { blue: 25, orange: 20 }],
-  ["bridgestone-20", 'Bridgestone 20"', 966, "orange", { blue: 25, orange: 20 }],
-  ["e80-hk-front-20", 'E80 HK Front 20"', 756, "orange", { orange: 20 }],
-  ["e80-hk-rear-20", 'E80 HK Rear 20"', 756, "orange", { orange: 16 }],
-  ["hk-performance-front-21", 'HK Performance Front 21"', 500, "orange", { orange: 20 }],
-  ["hk-performance-rear-21", 'HK Performance Rear 21"', 500, "orange", { orange: 16 }],
-  ["ct-p-20", 'CT P 20"', 420, "blue", { blue: 20 }],
-  ["e80-continental-front-19", 'E80 Continental Front 19"', 400, "blue", { blue: 25, orange: 20 }],
-  ["e80-continental-rear-19", 'E80 Continental Rear 19"', 400, "blue", { blue: 25, orange: 16 }],
-  ["goodyear-18", 'Goodyear 18"', 270, "blue", { blue: 16 }],
-  ["goodyear-20", 'Goodyear 20"', 595, "blue", { blue: 20 }],
-  ["e41-18-hk", 'E41 18" HK', 900, "blue", { blue: 25 }],
-  ["w68-front-18-rt", 'W68 Front 18" RT', 352, "orange", { blue: 20, orange: 16 }],
-  ["w68-rear-18-rt", 'W68 Rear 18" RT', 352, "blue", { blue: 20 }],
+  ["myp-19", 'MYP 19"', 975, "blue", { blue: 25, orange: 20 }, ["red", "red", "", ""]],
+  ["bridgestone-20", 'Bridgestone 20"', 966, "orange", { blue: 25, orange: 20 }, ["yellow", "", "", ""]],
+  ["e80-hk-front-20", 'E80 HK Front 20"', 756, "orange", { orange: 20 }, ["", "", "", ""]],
+  ["e80-hk-rear-20", 'E80 HK Rear 20"', 756, "orange", { orange: 16 }, ["", "", "", ""]],
+  ["hk-performance-front-21", 'HK Performance Front 21"', 500, "orange", { orange: 20 }, ["", "", "", ""]],
+  ["hk-performance-rear-21", 'HK Performance Rear 21"', 500, "orange", { orange: 16 }, ["", "", "", ""]],
+  ["ct-p-20", 'CT P 20"', 420, "blue", { blue: 20 }, ["", "", "", ""]],
+  ["e80-continental-front-19", 'E80 Continental Front 19"', 400, "blue", { blue: 25, orange: 20 }, ["", "", "", ""]],
+  ["e80-continental-rear-19", 'E80 Continental Rear 19"', 400, "blue", { blue: 25, orange: 16 }, ["", "", "", ""]],
+  ["goodyear-18", 'Goodyear 18"', 270, "blue", { blue: 16 }, ["", "", "", ""]],
+  ["goodyear-20", 'Goodyear 20"', 595, "blue", { blue: 20 }, ["", "", "", ""]],
+  ["e41-18-hk", 'E41 18" HK', 900, "blue", { blue: 25 }, ["", "", "", ""]],
+  ["w68-front-18-rt", 'W68 Front 18" RT', 352, "orange", { blue: 20, orange: 16 }, ["", "", "", ""]],
+  ["w68-rear-18-rt", 'W68 Rear 18" RT', 352, "blue", { blue: 20 }, ["", "", "", ""]],
 ];
 
 assert.equal(seedTires.length, expectedTires.length, "Exactly 14 initial tire types are expected");
 
 for (const [index, expected] of expectedTires.entries()) {
-  const [id, name, expectedQty, defaultColor, presets] = expected;
+  const [id, name, expectedQty, defaultColor, presets, stripeColors] = expected;
   const tire = seedTires[index];
   assert.equal(tire.id, id, `Tire ${index + 1} must keep its stable id`);
   assert.equal(tire.name, name, `${id} must keep its display name`);
@@ -41,6 +42,7 @@ for (const [index, expected] of expectedTires.entries()) {
     presets,
     `${id} must keep its Blue/Orange rack capacities`,
   );
+  assert.deepEqual(tire.stripeColors, stripeColors, `${id} must keep its four stripe colors`);
 }
 
 for (const tire of seedTires) {

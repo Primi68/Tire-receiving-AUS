@@ -1,18 +1,19 @@
 # Tire Receiving 검증 기준
 
-대상: **0.1.0 / versionCode 1 / `v0.1.0-mvp`**
+대상: **0.1.1 / versionCode 2 / `v0.1.1-mvp`**
 
 검증은 정적 계약, Android 빌드·lint, 서명·릴리스 파일, 실제 Android 기기 순서로 진행합니다. 명령이 문서에 있다는 사실은 통과를 뜻하지 않습니다. 각 릴리스 담당자는 실행 결과와 기기 정보를 별도로 기록해야 합니다.
 
-## 0. 0.1.0 릴리스 실행 결과
+## 0. 0.1.1 릴리스 실행 결과
 
 2026-11-10에 다음 자동 검증을 실행해 통과했습니다.
 
-- `npm test`: 초기 타이어 14종의 고정 값, 계산식, DOM 76개, Android 오프라인 연결 확인
+- `npm test`: 초기 타이어 14종의 고정 값, 4줄 무늬, 계산식, DOM 78개, Android 오프라인 연결 확인
 - `npm run check`: `dist/app.js`, `dist/sw.js` JavaScript 구문 확인
+- Chromium 393×852: 새 검수에서 검색창 자동 포커스가 없고 14개 목록이 바로 보이는지, MYP·Bridgestone 무늬와 4줄 편집 미리보기 확인
 - `:app:assembleDebug`, `:app:lintDebug`: 성공
 - `:app:assembleRelease`, `:app:lintRelease`: 고정 키로 성공, lint 오류·경고 없음
-- `aapt`: package `com.primi.tirereceiving`, version `0.1.0`/`1`, min SDK 26, target SDK 35, 요청 권한 없음 확인
+- `aapt`: package `com.primi.tirereceiving`, version `0.1.1`/`2`, min SDK 26, target SDK 35, 요청 권한 없음 확인
 - `apksigner`: APK Signature Scheme v2 검증과 고정 인증서 SHA-256 일치 확인
 - 서명 환경 변수를 제거하면 release 빌드가 실패하는지 확인
 
@@ -28,6 +29,7 @@ npm run check
 `npm test`가 확인하는 범위:
 
 - 초기 타이어 14종의 이름, 기본 색상, 예상 수량
+- 각 타이어의 위에서 아래 4줄 무늬 초기값과 허용 색상
 - Blue/Orange 색상별 랙당 적재량 프리셋
 - 프리셋에서 유도한 계산식이 예상 수량을 재현하는지
 - JavaScript가 참조하는 DOM ID가 HTML에 존재하는지
@@ -87,7 +89,7 @@ Release는 고정 서명 환경 변수가 설정된 승인 환경에서만 실�
 
 - 빌드와 lint가 오류 없이 종료되는지
 - APK package가 `com.primi.tirereceiving`인지
-- `versionName=0.1.0`, `versionCode=1`인지
+- `versionName=0.1.1`, `versionCode=2`인지
 - `minSdkVersion=26`인지
 - APK assets에 현재 `dist/` 파일이 포함되는지
 - merged manifest에 `android.permission.INTERNET`이 없는지
@@ -111,9 +113,9 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 
 ## 5. Release 파일
 
-`v0.1.0-mvp` Release에는 다음 파일이 있어야 합니다.
+`v0.1.1-mvp` Release에는 다음 파일이 있어야 합니다.
 
-- `Tire-Receiving-0.1.0-preview.apk`
+- `Tire-Receiving-0.1.1-preview.apk`
 - `SHA256SUMS.txt`
 - `SIGNING-CERT-SHA256.txt`
 
@@ -138,7 +140,9 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 검수:
 
 - [ ] 초기 타이어가 14종이다.
+- [ ] 새 검수를 열면 검색창에 자동 포커스되지 않고 전체 타이어 목록이 바로 보인다.
 - [ ] 이름과 한글·영문 별칭 검색이 된다.
+- [ ] MYP 위 두 줄은 빨강, Bridgestone 맨 위 줄은 노랑으로 보인다.
 - [ ] 색상 변경 시 해당 랙당 적재량과 식이 갱신된다.
 - [ ] 수량 stepper와 직접 입력이 터치·키보드에서 동작한다.
 - [ ] 일치, 양수 차이, 음수 차이가 구분된다.
@@ -154,6 +158,7 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 마스터:
 
 - [ ] 타이어를 추가·수정·삭제할 수 있다.
+- [ ] 타이어 무늬 네 줄을 각각 편집하고 목록에서 저장 결과를 확인할 수 있다.
 - [ ] Blue/Orange 적재량과 기본 색상을 바꿀 수 있다.
 - [ ] 현장 검수에서 수정한 적재량을 프리셋으로 저장할 수 있다.
 

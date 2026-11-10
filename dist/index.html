@@ -269,6 +269,14 @@
         <label><span>검색용 별칭 <small>(쉼표로 구분)</small></span><input id="masterAliasesInput" type="text" placeholder="예: MY P, myp" /></label>
         <label><span>기본 예상 총수량</span><input id="masterExpectedInput" type="number" inputmode="numeric" min="1" step="1" required /></label>
 
+        <fieldset class="tire-stripe-editor">
+          <legend>타이어 무늬 <small>위에서 아래 순서</small></legend>
+          <div class="tire-stripe-editor-body">
+            <div class="tire-stripe-preview" id="masterStripePreview"></div>
+            <div class="tire-stripe-controls" id="masterStripeControls"></div>
+          </div>
+        </fieldset>
+
         <div class="preset-editor preset-editor-blue">
           <label class="preset-enable"><input id="masterBlueEnabled" type="checkbox" /><span class="rack-swatch"></span><strong>Blue 랙 프리셋</strong></label>
           <label><span>랙당 적재량</span><input id="masterBlueQty" type="number" inputmode="numeric" min="1" step="1" /></label>
