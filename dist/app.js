@@ -5,9 +5,38 @@ const STORAGE_KEYS = {
 
 const COLOR_LABELS = { blue: "Blue", orange: "Orange" };
 const STATUS_LABELS = { complete: "완료", in_progress: "검수 중", pending: "Pending", partial: "부분 입고" };
-const STRIPE_COLORS = ["", "red", "yellow", "green", "white", "blue", "orange", "purple"];
-const STRIPE_LABELS = { "": "없음", red: "빨강", yellow: "노랑", green: "초록", white: "흰색", blue: "파랑", orange: "주황", purple: "보라" };
+const STRIPE_COLORS = ["", "red", "yellow", "green", "white", "blue", "orange", "purple", "coral", "sky", "brown", "yellow-dashed", "orange-dashed"];
+const STRIPE_LABELS = {
+  "": "없음",
+  red: "빨강",
+  yellow: "노랑",
+  green: "초록",
+  white: "흰색",
+  blue: "파랑",
+  orange: "주황",
+  purple: "보라",
+  coral: "다홍",
+  sky: "하늘",
+  brown: "갈색",
+  "yellow-dashed": "노랑 점선",
+  "orange-dashed": "주황 점선",
+};
 const DEFAULT_STRIPES = {
+  "myp-19": ["red", "red", "", ""],
+  "bridgestone-20": ["yellow", "", "", ""],
+  "e80-hk-front-20": ["green", "", "", ""],
+  "e80-hk-rear-20": ["green", "", "orange", ""],
+  "hk-performance-front-21": ["coral", "", "", ""],
+  "hk-performance-rear-21": ["white", "", "", ""],
+  "ct-p-20": ["yellow", "orange", "", ""],
+  "e80-continental-front-19": ["white", "orange", "", ""],
+  "e80-continental-rear-19": ["", "yellow-dashed", "orange-dashed", ""],
+  "e41-18-hk": ["sky", "", "", ""],
+  "w68-front-18-rt": ["brown", "", "red", "orange"],
+  "w68-rear-18-rt": ["green", "purple", "green", ""],
+};
+const DEFAULT_STRIPE_CLOSE_PAIRS = { "myp-19": 0, "ct-p-20": 0, "e80-continental-rear-19": 1, "w68-front-18-rt": 2 };
+const LEGACY_011_STRIPES = {
   "myp-19": ["red", "red", "", ""],
   "bridgestone-20": ["yellow", "", "", ""],
 };
@@ -19,6 +48,7 @@ const SEED_TIRES = [
     aliases: ["MY P", "MYP"],
     expectedQty: 975,
     stripeColors: ["red", "red", "", ""],
+    stripeClosePair: 0,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 20 } },
   },
@@ -28,6 +58,7 @@ const SEED_TIRES = [
     aliases: ["브리지스톤", "브릿지스톤"],
     expectedQty: 966,
     stripeColors: ["yellow", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "orange",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 20 } },
   },
@@ -36,7 +67,8 @@ const SEED_TIRES = [
     name: 'E80 HK Front 20"',
     aliases: ["한국 프런트", "한국 front", "HK F"],
     expectedQty: 756,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["green", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 20 } },
   },
@@ -45,7 +77,8 @@ const SEED_TIRES = [
     name: 'E80 HK Rear 20"',
     aliases: ["한국 레어", "한국 rear", "HK R"],
     expectedQty: 756,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["green", "", "orange", ""],
+    stripeClosePair: null,
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 16 } },
   },
@@ -54,7 +87,8 @@ const SEED_TIRES = [
     name: 'HK Performance Front 21"',
     aliases: ["HK Perf Front", "퍼포먼스 프런트"],
     expectedQty: 500,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["coral", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 20 } },
   },
@@ -63,7 +97,8 @@ const SEED_TIRES = [
     name: 'HK Performance Rear 21"',
     aliases: ["HK Perf Rear", "퍼포먼스 레어"],
     expectedQty: 500,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["white", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 16 } },
   },
@@ -72,7 +107,8 @@ const SEED_TIRES = [
     name: 'CT P 20"',
     aliases: ["CTP", "CT P"],
     expectedQty: 420,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["yellow", "orange", "", ""],
+    stripeClosePair: 0,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 20 } },
   },
@@ -81,7 +117,8 @@ const SEED_TIRES = [
     name: 'E80 Continental Front 19"',
     aliases: ["E80 Conti Front", "콘티 프런트"],
     expectedQty: 400,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["white", "orange", "", ""],
+    stripeClosePair: null,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 20 } },
   },
@@ -90,7 +127,8 @@ const SEED_TIRES = [
     name: 'E80 Continental Rear 19"',
     aliases: ["E80 Conti Rear", "콘티 레어"],
     expectedQty: 400,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["", "yellow-dashed", "orange-dashed", ""],
+    stripeClosePair: 1,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 }, orange: { qtyPerRack: 16 } },
   },
@@ -100,6 +138,7 @@ const SEED_TIRES = [
     aliases: ["GY 18", "굿이어 18"],
     expectedQty: 270,
     stripeColors: ["", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 16 } },
   },
@@ -109,6 +148,7 @@ const SEED_TIRES = [
     aliases: ["GY 20", "굿이어 20"],
     expectedQty: 595,
     stripeColors: ["", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 20 } },
   },
@@ -117,7 +157,8 @@ const SEED_TIRES = [
     name: 'E41 18" HK',
     aliases: ["E41", "E41 HK"],
     expectedQty: 900,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["sky", "", "", ""],
+    stripeClosePair: null,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 25 } },
   },
@@ -126,7 +167,8 @@ const SEED_TIRES = [
     name: 'W68 Front 18" RT',
     aliases: ["W68 Front", "W68 프런트"],
     expectedQty: 352,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["brown", "", "red", "orange"],
+    stripeClosePair: 2,
     defaultColor: "orange",
     presets: { blue: { qtyPerRack: 20 }, orange: { qtyPerRack: 16 } },
   },
@@ -135,7 +177,8 @@ const SEED_TIRES = [
     name: 'W68 Rear 18" RT',
     aliases: ["W68 Rear", "W68 레어"],
     expectedQty: 352,
-    stripeColors: ["", "", "", ""],
+    stripeColors: ["green", "purple", "green", ""],
+    stripeClosePair: null,
     defaultColor: "blue",
     presets: { blue: { qtyPerRack: 20 } },
   },
@@ -225,6 +268,7 @@ const elements = {
   masterExpectedInput: document.querySelector("#masterExpectedInput"),
   masterStripePreview: document.querySelector("#masterStripePreview"),
   masterStripeControls: document.querySelector("#masterStripeControls"),
+  masterStripeClosePair: document.querySelector("#masterStripeClosePair"),
   masterBlueEnabled: document.querySelector("#masterBlueEnabled"),
   masterBlueQty: document.querySelector("#masterBlueQty"),
   masterBlueFormula: document.querySelector("#masterBlueFormula"),
@@ -351,6 +395,7 @@ function bindEvents() {
   [elements.masterExpectedInput, elements.masterBlueQty, elements.masterOrangeQty].forEach((input) => input.addEventListener("input", updateMasterFormulaPreview));
   [elements.masterBlueEnabled, elements.masterOrangeEnabled].forEach((input) => input.addEventListener("change", updateMasterPresetControls));
   elements.masterStripeControls.addEventListener("change", updateMasterStripePreview);
+  elements.masterStripeClosePair.addEventListener("change", updateMasterStripePreview);
   elements.masterForm.addEventListener("submit", saveMasterTire);
   elements.deleteTireButton.addEventListener("click", deleteMasterTire);
 
@@ -477,26 +522,50 @@ function normalizeStripeColors(value, tireId = "") {
   return Array.from({ length: 4 }, (_, index) => STRIPE_COLORS.includes(value[index]) ? value[index] : "");
 }
 
+function normalizeStripeClosePair(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const pair = Number(value);
+  return Number.isInteger(pair) && pair >= 0 && pair <= 2 ? pair : null;
+}
+
+function sameStripeColors(left, right) {
+  return left.length === right.length && left.every((color, index) => color === right[index]);
+}
+
 function withNormalizedStripes(tire) {
-  return { ...tire, stripeColors: normalizeStripeColors(tire.stripeColors, tire.id) };
+  const hasStripeColors = Array.isArray(tire.stripeColors);
+  const normalizedColors = normalizeStripeColors(tire.stripeColors, tire.id);
+  const legacyColors = LEGACY_011_STRIPES[tire.id] || ["", "", "", ""];
+  const hasClosePair = Object.prototype.hasOwnProperty.call(tire, "stripeClosePair");
+  const upgradeFrom011 = hasStripeColors && !hasClosePair && sameStripeColors(normalizedColors, legacyColors);
+  const useCurrentMarking = hasStripeColors && !upgradeFrom011;
+  return {
+    ...tire,
+    stripeColors: useCurrentMarking ? normalizedColors : normalizeStripeColors(null, tire.id),
+    stripeClosePair: useCurrentMarking ? normalizeStripeClosePair(tire.stripeClosePair) : (DEFAULT_STRIPE_CLOSE_PAIRS[tire.id] ?? null),
+  };
 }
 
 function tireStripeIcon(tire, extraClass = "") {
   const colors = normalizeStripeColors(tire?.stripeColors, tire?.id);
+  const closePair = normalizeStripeClosePair(tire?.stripeClosePair);
   const painted = colors.filter(Boolean);
-  const label = painted.length
+  let label = painted.length
     ? `타이어 무늬, 위에서부터 ${colors.map((color) => STRIPE_LABELS[color]).join(", ")}`
     : "타이어 무늬 미설정";
+  if (closePair !== null) label += `, ${closePair + 1}번째와 ${closePair + 2}번째 줄 가까이`;
   const lines = colors.map((color) => `<span class="tire-stripe-line stripe-${color || "none"}"></span>`).join("");
-  return `<span class="tire-stripe-icon ${escapeHtml(extraClass)}" role="img" aria-label="${escapeHtml(label)}">${lines}</span>`;
+  const closeClass = closePair === null ? "" : `close-pair-${closePair + 1}`;
+  return `<span class="tire-stripe-icon ${escapeHtml([extraClass, closeClass].filter(Boolean).join(" "))}" role="img" aria-label="${escapeHtml(label)}">${lines}</span>`;
 }
 
-function renderMasterStripeControls(colors) {
+function renderMasterStripeControls(colors, closePair = null) {
   const normalized = normalizeStripeColors(colors);
   elements.masterStripeControls.innerHTML = normalized.map((selected, index) => {
     const options = STRIPE_COLORS.map((color) => `<option value="${color}" ${color === selected ? "selected" : ""}>${STRIPE_LABELS[color]}</option>`).join("");
     return `<label><span>${index + 1}번째 줄</span><select data-master-stripe="${index}">${options}</select></label>`;
   }).join("");
+  elements.masterStripeClosePair.value = normalizeStripeClosePair(closePair) ?? "";
   updateMasterStripePreview();
 }
 
@@ -504,8 +573,15 @@ function currentMasterStripeColors() {
   return [...elements.masterStripeControls.querySelectorAll("[data-master-stripe]")].map((select) => select.value);
 }
 
+function currentMasterStripeClosePair() {
+  return normalizeStripeClosePair(elements.masterStripeClosePair.value);
+}
+
 function updateMasterStripePreview() {
-  elements.masterStripePreview.innerHTML = tireStripeIcon({ stripeColors: currentMasterStripeColors() }, "is-large");
+  elements.masterStripePreview.innerHTML = tireStripeIcon({
+    stripeColors: currentMasterStripeColors(),
+    stripeClosePair: currentMasterStripeClosePair(),
+  }, "is-large");
 }
 
 function emptyStateTemplate(title, description) {
@@ -764,7 +840,7 @@ function openMasterEditor(tireId = "") {
   elements.masterNameInput.value = tire?.name || "";
   elements.masterAliasesInput.value = tire?.aliases?.join(", ") || "";
   elements.masterExpectedInput.value = tire?.expectedQty || "";
-  renderMasterStripeControls(tire?.stripeColors || normalizeStripeColors(null, tire?.id));
+  renderMasterStripeControls(tire?.stripeColors || normalizeStripeColors(null, tire?.id), tire?.stripeClosePair);
   elements.masterBlueEnabled.checked = Boolean(tire?.presets?.blue);
   elements.masterBlueQty.value = tire?.presets?.blue?.qtyPerRack || "";
   elements.masterOrangeEnabled.checked = Boolean(tire?.presets?.orange);
@@ -835,6 +911,7 @@ function saveMasterTire(event) {
     aliases: elements.masterAliasesInput.value.split(",").map((value) => value.trim()).filter(Boolean),
     expectedQty: numberValue(elements.masterExpectedInput.value),
     stripeColors: currentMasterStripeColors(),
+    stripeClosePair: currentMasterStripeClosePair(),
     defaultColor: presets[elements.masterDefaultColor.value] ? elements.masterDefaultColor.value : Object.keys(presets)[0],
     presets,
   };
@@ -1034,6 +1111,7 @@ function isValidBackup(data) {
     }
     if (tire.aliases !== undefined && !Array.isArray(tire.aliases)) return false;
     if (tire.stripeColors !== undefined && (!Array.isArray(tire.stripeColors) || tire.stripeColors.length !== 4 || tire.stripeColors.some((color) => !STRIPE_COLORS.includes(color)))) return false;
+    if (tire.stripeClosePair !== undefined && tire.stripeClosePair !== null && normalizeStripeClosePair(tire.stripeClosePair) !== tire.stripeClosePair) return false;
     tireIds.add(tire.id);
   }
   for (const record of data.records) {

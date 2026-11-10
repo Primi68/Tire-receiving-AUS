@@ -13,6 +13,14 @@
 
 최신 버전이 위에 오도록 기록합니다.
 
+### 0.1.2 — 상세 타이어 무늬
+
+- 14개 초기 타이어의 실제 식별 무늬를 색선 순서에 맞게 확장
+- 다홍·하늘·갈색과 노랑·주황 점선 추가
+- MYP, CT P, E80 Continental Rear, W68 Front의 가까운 줄 간격 표현
+- Tire presets에서 네 줄 색상과 가까운 줄 조합을 수정 가능
+- 기존 0.1.1 사용자 무늬는 직접 수정된 값이면 유지하고, 초기값 그대로인 항목만 새 기본 무늬로 보완
+
 ### 0.1.1 — 목록 선택과 타이어 무늬
 
 - 새 검수를 열 때 검색창에 자동으로 커서를 두지 않도록 변경
@@ -37,13 +45,13 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 태그 | `v0.1.1-mvp` |
-| APK | `Tire-Receiving-0.1.1-preview.apk` |
+| 태그 | `v0.1.2-mvp` |
+| APK | `Tire-Receiving-0.1.2-preview.apk` |
 | Package | `com.primi.tirereceiving` |
-| Version | `0.1.1` (`versionCode 2`) |
+| Version | `0.1.2` (`versionCode 3`) |
 | 최소 Android | Android 8.0 / API 26 |
 
-자세한 내용은 [게시된 v0.1.1-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.1.1-mvp)와 [0.1.1 릴리스 노트](docs/releases/0.1.1.md)를 참고하세요.
+자세한 내용은 [게시된 v0.1.2-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.1.2-mvp)와 [0.1.2 릴리스 노트](docs/releases/0.1.2.md)를 참고하세요.
 
 ## 바로 사용하기
 
@@ -51,7 +59,7 @@
 - 비공개 GitHub 저장소: <https://github.com/Primi68/Tire-receiving-AUS>
 - APK 설치와 업데이트: [docs/INSTALL.md](docs/INSTALL.md)
 
-게시된 `v0.1.1-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
+게시된 `v0.1.2-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
 
 ## 현장 사용 흐름
 
@@ -69,24 +77,24 @@
 
 아래 값은 최초 실행 시 생성되는 기본값입니다. 타이어 마스터에서 예상 수량, 기본 색상, Blue/Orange 사용 여부와 랙당 적재량을 수정할 수 있습니다.
 
-목록의 4줄 아이콘은 실제 타이어의 식별용 색 띠를 위에서 아래 순서로 표시합니다. 초기값은 MYP가 빨강·빨강·없음·없음, Bridgestone이 노랑·없음·없음·없음이며 나머지는 미설정입니다. **Tire presets**에서 네 줄을 각각 바꿀 수 있습니다.
+목록의 4줄 아이콘은 실제 타이어의 식별용 색 띠를 위에서 아래 순서로 표시합니다. 점선과 가까운 줄 간격도 구분하며, **Tire presets**에서 네 줄과 줄 간격을 바꿀 수 있습니다. Goodyear 18/20은 색선 없이 회색 트레드 패턴만 표시합니다.
 
-| 타이어 | 기본 적재 형태 | 기본 계산식 | 예상 수량 | 추가 프리셋 |
-| --- | --- | ---: | ---: | --- |
-| MYP 19" | Blue 25/rack | `25 × 4 × 9 + 75` | 975 | Orange 20/rack |
-| Bridgestone 20" | Orange 20/rack | `20 × 4 × 12 + 6` | 966 | Blue 25/rack |
-| E80 HK Front 20" | Orange 20/rack | `20 × 4 × 9 + 36` | 756 | — |
-| E80 HK Rear 20" | Orange 16/rack | `16 × 4 × 11 + 52` | 756 | — |
-| HK Performance Front 21" | Orange 20/rack | `20 × 4 × 6 + 20` | 500 | — |
-| HK Performance Rear 21" | Orange 16/rack | `16 × 4 × 7 + 52` | 500 | — |
-| CT P 20" | Blue 20/rack | `20 × 4 × 5 + 20` | 420 | — |
-| E80 Continental Front 19" | Blue 25/rack | `25 × 4 × 4` | 400 | Orange 20/rack |
-| E80 Continental Rear 19" | Blue 25/rack | `25 × 4 × 4` | 400 | Orange 16/rack |
-| Goodyear 18" | Blue 16/rack | `16 × 4 × 4 + 14` | 270 | — |
-| Goodyear 20" | Blue 20/rack | `20 × 4 × 7 + 35` | 595 | — |
-| E41 18" HK | Blue 25/rack | `25 × 4 × 9` | 900 | — |
-| W68 Front 18" RT | Orange 16/rack | `16 × 4 × 5 + 32` | 352 | Blue 20/rack |
-| W68 Rear 18" RT | Blue 20/rack | `20 × 4 × 4 + 32` | 352 | — |
+| 타이어 | 기본 무늬 <small>(위→아래)</small> | 기본 적재 형태 | 기본 계산식 | 예상 수량 | 추가 프리셋 |
+| --- | --- | --- | ---: | ---: | --- |
+| MYP 19" | 빨강·빨강·—·—, 1·2 가까이 | Blue 25/rack | `25 × 4 × 9 + 75` | 975 | Orange 20/rack |
+| Bridgestone 20" | 노랑·—·—·— | Orange 20/rack | `20 × 4 × 12 + 6` | 966 | Blue 25/rack |
+| E80 HK Front 20" | 초록·—·—·— | Orange 20/rack | `20 × 4 × 9 + 36` | 756 | — |
+| E80 HK Rear 20" | 초록·—·주황·— | Orange 16/rack | `16 × 4 × 11 + 52` | 756 | — |
+| HK Performance Front 21" | 다홍·—·—·— | Orange 20/rack | `20 × 4 × 6 + 20` | 500 | — |
+| HK Performance Rear 21" | 흰색·—·—·— | Orange 16/rack | `16 × 4 × 7 + 52` | 500 | — |
+| CT P 20" | 노랑·주황·—·—, 1·2 가까이 | Blue 20/rack | `20 × 4 × 5 + 20` | 420 | — |
+| E80 Continental Front 19" | 흰색·주황·—·— | Blue 25/rack | `25 × 4 × 4` | 400 | Orange 20/rack |
+| E80 Continental Rear 19" | —·노랑 점선·주황 점선·—, 2·3 가까이 | Blue 25/rack | `25 × 4 × 4` | 400 | Orange 16/rack |
+| Goodyear 18" | 색선 없음 | Blue 16/rack | `16 × 4 × 4 + 14` | 270 | — |
+| Goodyear 20" | 색선 없음 | Blue 20/rack | `20 × 4 × 7 + 35` | 595 | — |
+| E41 18" HK | 하늘·—·—·— | Blue 25/rack | `25 × 4 × 9` | 900 | — |
+| W68 Front 18" RT | 갈색·—·빨강·주황, 3·4 가까이 | Orange 16/rack | `16 × 4 × 5 + 32` | 352 | Blue 20/rack |
+| W68 Rear 18" RT | 초록·보라·초록·— | Blue 20/rack | `20 × 4 × 4 + 32` | 352 | — |
 
 계산식의 묶음 수와 추가 수량은 검수할 때 매번 입력하는 값입니다. 표의 식은 정상 트레일러 수량을 맞추는 대표 입력 예시이며 고정된 재고 기록이 아닙니다.
 
@@ -121,9 +129,10 @@ Release 빌드는 고정 서명 환경 변수가 필요합니다. 서명 키 관
 - [개발·빌드·서명·릴리스](docs/DEVELOPMENT.md)
 - [로컬 데이터와 개인정보](docs/PRIVACY.md)
 - [자동/수동 검증 체크리스트](docs/VERIFICATION.md)
+- [0.1.2 릴리스 노트](docs/releases/0.1.2.md)
 - [0.1.1 릴리스 노트](docs/releases/0.1.1.md)
 - [0.1.0 릴리스 노트](docs/releases/0.1.0.md)
 
 ## 현재 범위
 
-0.1.1은 한 작업자가 현장에서 빠르게 수량을 확인하고 기록하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.
+0.1.2는 한 작업자가 현장에서 빠르게 수량을 확인하고 기록하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.

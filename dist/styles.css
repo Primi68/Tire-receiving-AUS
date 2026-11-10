@@ -544,6 +544,7 @@ main {
 }
 
 .tire-stripe-icon {
+  --stripe-pair-shift: 1.25px;
   display: grid;
   flex: 0 0 auto;
   grid-template-rows: repeat(4, 1fr);
@@ -558,6 +559,7 @@ main {
 }
 
 .tire-stripe-icon.is-large {
+  --stripe-pair-shift: 2px;
   width: 62px;
   height: 54px;
   gap: 5px;
@@ -579,6 +581,23 @@ main {
 .stripe-blue { background: #3b82f6; }
 .stripe-orange { background: #fb923c; }
 .stripe-purple { background: #a855f7; }
+.stripe-coral { background: #ff4f6d; }
+.stripe-sky { background: #38bdf8; }
+.stripe-brown { background: #a16207; }
+.stripe-yellow-dashed { background: repeating-linear-gradient(90deg, #facc15 0 6px, transparent 6px 9px); }
+.stripe-orange-dashed { background: repeating-linear-gradient(90deg, #fb923c 0 6px, transparent 6px 9px); }
+
+.tire-stripe-icon.close-pair-1 .tire-stripe-line:nth-child(1),
+.tire-stripe-icon.close-pair-2 .tire-stripe-line:nth-child(2),
+.tire-stripe-icon.close-pair-3 .tire-stripe-line:nth-child(3) {
+  transform: translateY(var(--stripe-pair-shift));
+}
+
+.tire-stripe-icon.close-pair-1 .tire-stripe-line:nth-child(2),
+.tire-stripe-icon.close-pair-2 .tire-stripe-line:nth-child(3),
+.tire-stripe-icon.close-pair-3 .tire-stripe-line:nth-child(4) {
+  transform: translateY(calc(var(--stripe-pair-shift) * -1));
+}
 
 .tire-master-top h3 {
   margin: 0;
@@ -1303,6 +1322,25 @@ label small {
 }
 
 .tire-stripe-controls select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+}
+
+.tire-stripe-spacing {
+  display: block;
+  margin-top: 12px;
+}
+
+.tire-stripe-spacing > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.tire-stripe-spacing select {
   width: 100%;
   min-height: 40px;
   padding: 8px;

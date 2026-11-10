@@ -1,6 +1,6 @@
 # Tire Receiving 제품 명세
 
-문서 기준 버전: **0.1.1 MVP**
+문서 기준 버전: **0.1.2 MVP**
 
 ## 1. 목적
 
@@ -63,7 +63,9 @@ Unloading schedule 확인은 현장에 내려가기 전에 예상 타이어를 �
 
 묶음 수와 추가 수량은 별도 고정값으로 저장하지 않고 현재 예상 수량과 랙당 적재량에서 다시 계산한다. 따라서 예상 수량이나 적재량을 바꾸면 계산식 미리보기도 함께 갱신된다.
 
-타이어 식별용 무늬는 랙 색상 프리셋과 별도로 관리한다. `stripeColors`는 위에서 아래 순서의 정확히 4개 값이며 각 값은 없음(`""`), `red`, `yellow`, `green`, `white`, `blue`, `orange`, `purple` 중 하나다.
+타이어 식별용 무늬는 랙 색상 프리셋과 별도로 관리한다. `stripeColors`는 위에서 아래 순서의 정확히 4개 값이며 각 값은 없음(`""`), `red`, `yellow`, `green`, `white`, `blue`, `orange`, `purple`, `coral`, `sky`, `brown`, `yellow-dashed`, `orange-dashed` 중 하나다. 점선 토큰은 색상과 선 형태를 함께 나타낸다.
+
+`stripeClosePair`는 가까이 표시할 인접 줄 한 쌍을 저장한다. `null`은 기본 간격, `0`은 1·2번째 줄, `1`은 2·3번째 줄, `2`는 3·4번째 줄이다.
 
 ## 5. 초기 타이어 마스터
 
@@ -71,20 +73,20 @@ Unloading schedule 확인은 현장에 내려가기 전에 예상 타이어를 �
 
 | # | 타이어 | 별칭 예시 | 기본 색상 | 색상별 랙당 적재량 | 예상 수량 | 초기 무늬 | 대표 계산식 |
 | ---: | --- | --- | --- | --- | ---: | --- | --- |
-| 1 | MYP 19" | MY P, MYP | Blue | Blue 25, Orange 20 | 975 | 빨강·빨강·없음·없음 | `25 × 4 × 9 + 75` |
+| 1 | MYP 19" | MY P, MYP | Blue | Blue 25, Orange 20 | 975 | 빨강·빨강·없음·없음, 1·2 가까이 | `25 × 4 × 9 + 75` |
 | 2 | Bridgestone 20" | 브리지스톤, 브릿지스톤 | Orange | Orange 20, Blue 25 | 966 | 노랑·없음·없음·없음 | `20 × 4 × 12 + 6` |
-| 3 | E80 HK Front 20" | 한국 프런트, 한국 front, HK F | Orange | Orange 20 | 756 | — | `20 × 4 × 9 + 36` |
-| 4 | E80 HK Rear 20" | 한국 레어, 한국 rear, HK R | Orange | Orange 16 | 756 | — | `16 × 4 × 11 + 52` |
-| 5 | HK Performance Front 21" | HK Perf Front, 퍼포먼스 프런트 | Orange | Orange 20 | 500 | — | `20 × 4 × 6 + 20` |
-| 6 | HK Performance Rear 21" | HK Perf Rear, 퍼포먼스 레어 | Orange | Orange 16 | 500 | — | `16 × 4 × 7 + 52` |
-| 7 | CT P 20" | CTP, CT P | Blue | Blue 20 | 420 | — | `20 × 4 × 5 + 20` |
-| 8 | E80 Continental Front 19" | E80 Conti Front, 콘티 프런트 | Blue | Blue 25, Orange 20 | 400 | — | `25 × 4 × 4` |
-| 9 | E80 Continental Rear 19" | E80 Conti Rear, 콘티 레어 | Blue | Blue 25, Orange 16 | 400 | — | `25 × 4 × 4` |
-| 10 | Goodyear 18" | GY 18, 굿이어 18 | Blue | Blue 16 | 270 | — | `16 × 4 × 4 + 14` |
-| 11 | Goodyear 20" | GY 20, 굿이어 20 | Blue | Blue 20 | 595 | — | `20 × 4 × 7 + 35` |
-| 12 | E41 18" HK | E41, E41 HK | Blue | Blue 25 | 900 | — | `25 × 4 × 9` |
-| 13 | W68 Front 18" RT | W68 Front, W68 프런트 | Orange | Orange 16, Blue 20 | 352 | — | `16 × 4 × 5 + 32` |
-| 14 | W68 Rear 18" RT | W68 Rear, W68 레어 | Blue | Blue 20 | 352 | — | `20 × 4 × 4 + 32` |
+| 3 | E80 HK Front 20" | 한국 프런트, 한국 front, HK F | Orange | Orange 20 | 756 | 초록·없음·없음·없음 | `20 × 4 × 9 + 36` |
+| 4 | E80 HK Rear 20" | 한국 레어, 한국 rear, HK R | Orange | Orange 16 | 756 | 초록·없음·주황·없음 | `16 × 4 × 11 + 52` |
+| 5 | HK Performance Front 21" | HK Perf Front, 퍼포먼스 프런트 | Orange | Orange 20 | 500 | 다홍·없음·없음·없음 | `20 × 4 × 6 + 20` |
+| 6 | HK Performance Rear 21" | HK Perf Rear, 퍼포먼스 레어 | Orange | Orange 16 | 500 | 흰색·없음·없음·없음 | `16 × 4 × 7 + 52` |
+| 7 | CT P 20" | CTP, CT P | Blue | Blue 20 | 420 | 노랑·주황·없음·없음, 1·2 가까이 | `20 × 4 × 5 + 20` |
+| 8 | E80 Continental Front 19" | E80 Conti Front, 콘티 프런트 | Blue | Blue 25, Orange 20 | 400 | 흰색·주황·없음·없음 | `25 × 4 × 4` |
+| 9 | E80 Continental Rear 19" | E80 Conti Rear, 콘티 레어 | Blue | Blue 25, Orange 16 | 400 | 없음·노랑 점선·주황 점선·없음, 2·3 가까이 | `25 × 4 × 4` |
+| 10 | Goodyear 18" | GY 18, 굿이어 18 | Blue | Blue 16 | 270 | 색선 없음 | `16 × 4 × 4 + 14` |
+| 11 | Goodyear 20" | GY 20, 굿이어 20 | Blue | Blue 20 | 595 | 색선 없음 | `20 × 4 × 7 + 35` |
+| 12 | E41 18" HK | E41, E41 HK | Blue | Blue 25 | 900 | 하늘·없음·없음·없음 | `25 × 4 × 9` |
+| 13 | W68 Front 18" RT | W68 Front, W68 프런트 | Orange | Orange 16, Blue 20 | 352 | 갈색·없음·빨강·주황, 3·4 가까이 | `16 × 4 × 5 + 32` |
+| 14 | W68 Rear 18" RT | W68 Rear, W68 레어 | Blue | Blue 20 | 352 | 초록·보라·초록·없음 | `20 × 4 × 4 + 32` |
 
 ## 6. 타이어 마스터 기능
 
@@ -96,7 +98,8 @@ Unloading schedule 확인은 현장에 내려가기 전에 예상 타이어를 �
 - Blue 프리셋 사용 여부와 랙당 적재량
 - Orange 프리셋 사용 여부와 랙당 적재량
 - 기본 랙 색상
-- 위에서 아래 순서의 타이어 무늬 네 줄 색상
+- 위에서 아래 순서의 타이어 무늬 네 줄 색상·점선
+- 가까이 표시할 인접 줄 한 쌍
 
 Blue 또는 Orange 프리셋이 최소 하나 필요하다. 기존 타이어 마스터 삭제는 확인 대화상자를 거친다. 해당 타이어의 과거 검수 기록은 당시 이름과 수량 스냅샷을 유지하지만, 삭제된 마스터의 기록을 다시 편집하려면 타이어를 먼저 다시 등록해야 한다.
 
@@ -138,7 +141,8 @@ Trailer 입력은 저장할 때 대문자로 정규화한다. 부분 입고의 �
 
 - 타이어 이름과 별칭 검색
 - 4줄 무늬 아이콘, 예상 수량과 색상별 계산식 미리보기
-- 무늬 네 줄을 각각 없음 또는 일곱 가지 색상으로 편집
+- 무늬 네 줄을 각각 없음, 색상 또는 점선으로 편집
+- 줄 간격을 기본, 1·2, 2·3, 3·4번째 줄 가까이 중에서 선택
 - 타이어 추가·수정·삭제
 
 ### Data
@@ -158,10 +162,12 @@ Trailer 입력은 저장할 때 대문자로 정규화한다. 부분 입고의 �
 
 0.1.1은 저장 키를 바꾸지 않고 타이어 항목에 `stripeColors`를 추가한다. 이 필드가 없는 기존 로컬 데이터와 백업은 MYP·Bridgestone의 ID별 초기 무늬 또는 빈 네 줄로 자동 보완한다. 백업에 이 필드가 있으면 길이 4와 허용 색상을 모두 검증한다.
 
+0.1.2도 같은 저장 키를 유지하면서 `stripeClosePair`와 새 무늬 토큰을 추가한다. 0.1.0처럼 `stripeColors`가 없거나, `stripeClosePair`가 없고 색 배열이 0.1.1 초기값과 정확히 같은 타이어만 0.1.2 기본 무늬로 갱신한다. 사용자가 0.1.1에서 색을 하나라도 바꾼 타이어는 그 배열을 보존하고 줄 간격만 기본값으로 보완한다. 백업의 `stripeClosePair`는 없을 수 있으며, 있으면 `null` 또는 정수 0·1·2만 허용한다.
+
 ## 10. Android 범위
 
 - Package: `com.primi.tirereceiving`
-- Version: `0.1.1`, `versionCode 2`
+- Version: `0.1.2`, `versionCode 3`
 - 최소 OS: Android 8.0 / API 26
 - `dist/` 정적 파일을 APK assets로 직접 포함
 - 앱 내부 가상 HTTPS 호스트에서만 정적 파일 로드
@@ -184,7 +190,7 @@ Trailer 입력은 저장할 때 대문자로 정규화한다. 부분 입고의 �
 ## 12. 완료 기준
 
 - 초기 타이어가 정확히 14개이며 각 예상 수량과 프리셋이 명세와 일치한다.
-- MYP와 Bridgestone의 초기 무늬가 맞고 네 줄을 타이어별로 수정할 수 있다.
+- 14개 초기 무늬의 색·점선·가까운 줄 조합이 명세와 맞고 타이어별로 수정할 수 있다.
 - 모든 대표 계산식이 예상 수량을 재현한다.
 - 등록된 색상 선택 시 랙당 적재량과 계산식이 자동 제안된다.
 - 계산값이 다르면 차이가 표시되고 수정값을 저장할 수 있다.

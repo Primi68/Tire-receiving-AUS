@@ -1,6 +1,6 @@
 {
   "name": "tire-receiving",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "test": "node tests/validate-static.mjs",
