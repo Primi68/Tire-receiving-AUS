@@ -1,0 +1,55 @@
+plugins { id 'com.android.application' }
+
+def releaseStoreFile = System.getenv('TIRE_RELEASE_STORE_FILE')
+def releaseStorePassword = System.getenv('TIRE_RELEASE_STORE_PASSWORD')
+def requireReleaseSigning = tasks.register('requireReleaseSigning') {
+    doLast {
+        if (!releaseStoreFile || !releaseStorePassword || !file(releaseStoreFile).isFile()) {
+            throw new GradleException('Fixed release signing is required. Set TIRE_RELEASE_STORE_FILE and TIRE_RELEASE_STORE_PASSWORD; debug signing is never a release fallback.')
+        }
+    }
+}
+
+android {
+    namespace 'com.primi.tirereceiving'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.primi.tirereceiving'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    sourceSets {
+        main.assets.srcDirs = ["$rootDir/dist"]
+    }
+
+    signingConfigs {
+        release {
+            if (releaseStoreFile && releaseStorePassword) {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias 'tire-receiving'
+                keyPassword releaseStorePassword
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+tasks.configureEach {
+    if (name == 'preReleaseBuild' || name == 'validateSigningRelease') dependsOn requireReleaseSigning
+}

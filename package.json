@@ -1,0 +1,9 @@
+{
+  "name": "tire-receiving",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node tests/validate-static.mjs",
+    "check": "node --check dist/app.js && node --check dist/sw.js"
+  }
+}

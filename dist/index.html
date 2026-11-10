@@ -235,7 +235,7 @@
                 </select>
               </label>
               <label><span>Dock #</span><input id="dockInput" type="text" inputmode="numeric" placeholder="예: 4" /></label>
-              <label><span>Trailer #</span><input id="trailerInput" type="text" placeholder="예: SIDD6143" autocapitalize="characters" /></label>
+              <label><span>Trailer #</span><input id="trailerInput" type="text" placeholder="예: DEMO-001" autocapitalize="characters" /></label>
             </div>
             <div class="partial-fields" id="partialFields" hidden>
               <label><span>이미 받은 수량</span><input id="receivedQtyInput" type="number" inputmode="numeric" min="0" step="1" value="0" /></label>
@@ -317,7 +317,7 @@
       <div class="sheet-body data-actions">
         <p>이 기기에 저장된 프리셋과 검수 기록을 JSON 파일로 백업하거나 다른 기기에서 복원할 수 있습니다.</p>
         <button class="secondary-button" id="exportDataButton" type="button">데이터 백업 파일 받기</button>
-        <label class="secondary-button file-button">백업 파일에서 복원<input id="importDataInput" type="file" accept="application/json,.json" /></label>
+        <label class="secondary-button file-button" id="importDataButton">백업 파일에서 복원<input id="importDataInput" type="file" accept="application/json,.json" /></label>
         <p class="storage-note"><span id="connectionDot"></span><span id="connectionLabel">연결 상태 확인 중</span> · 데이터는 현재 기기에 자동 저장됩니다.</p>
       </div>
     </section>

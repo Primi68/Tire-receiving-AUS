@@ -207,6 +207,7 @@ const elements = {
   recordSheet: document.querySelector("#recordSheet"),
   recordDetailBody: document.querySelector("#recordDetailBody"),
   dataSheet: document.querySelector("#dataSheet"),
+  importDataButton: document.querySelector("#importDataButton"),
   importDataInput: document.querySelector("#importDataInput"),
   connectionDot: document.querySelector("#connectionDot"),
   connectionLabel: document.querySelector("#connectionLabel"),
@@ -221,7 +222,7 @@ function initialize() {
   renderAll();
   updateConnectionStatus();
 
-  if ("serviceWorker" in navigator) {
+  if ("serviceWorker" in navigator && !window.TireNative) {
     window.addEventListener("load", () => {
       navigator.serviceWorker.register("./sw.js").catch(() => {});
     });
@@ -326,6 +327,11 @@ function bindEvents() {
   elements.recordDetailBody.addEventListener("click", handleRecordDetailAction);
 
   document.querySelector("#exportDataButton").addEventListener("click", exportData);
+  elements.importDataButton.addEventListener("click", (event) => {
+    if (!window.TireNative?.importFile) return;
+    event.preventDefault();
+    window.TireNative.importFile();
+  });
   elements.importDataInput.addEventListener("change", importData);
   window.addEventListener("online", updateConnectionStatus);
   window.addEventListener("offline", updateConnectionStatus);
@@ -888,11 +894,17 @@ function exportData() {
     tires,
     records,
   };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const json = JSON.stringify(payload, null, 2);
+  const filename = `tire-receiving-backup-${todayIso()}.json`;
+  if (window.TireNative?.exportFile) {
+    window.TireNative.exportFile(filename, "application/json", json);
+    return;
+  }
+  const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `tire-receiving-backup-${todayIso()}.json`;
+  anchor.download = filename;
   anchor.click();
   setTimeout(() => URL.revokeObjectURL(url), 500);
   showToast("백업 파일을 만들었습니다.");
@@ -902,8 +914,12 @@ async function importData(event) {
   const [file] = event.target.files;
   event.target.value = "";
   if (!file) return;
+  await restoreBackupJson(await file.text());
+}
+
+async function restoreBackupJson(text) {
   try {
-    const data = JSON.parse(await file.text());
+    const data = JSON.parse(text);
     if (!isValidBackup(data)) throw new Error("invalid");
     if (!window.confirm(`프리셋 ${data.tires.length}개와 기록 ${data.records.length}개로 현재 데이터를 바꿀까요?`)) return;
     replaceLocalData(data.tires, data.records);
@@ -916,6 +932,21 @@ async function importData(event) {
     showToast("올바른 백업 파일이 아닙니다.");
   }
 }
+
+window.receiveBackup = (text) => restoreBackupJson(text);
+
+window.handleAndroidBack = () => {
+  if (!elements.sheetBackdrop.hidden) {
+    closeSheets();
+    return "handled";
+  }
+  const activeView = document.querySelector(".view.is-active")?.dataset.view;
+  if (activeView && activeView !== "today") {
+    setView("today");
+    return "handled";
+  }
+  return "exit";
+};
 
 function isValidBackup(data) {
   if (!data || !Array.isArray(data.tires) || !Array.isArray(data.records)) return false;
@@ -1069,6 +1100,11 @@ function saveJson(key, value) {
 }
 
 function updateConnectionStatus() {
+  if (window.TireNative) {
+    elements.connectionLabel.textContent = "오프라인 앱";
+    elements.connectionDot.style.background = "var(--green)";
+    return;
+  }
   const online = navigator.onLine;
   elements.connectionLabel.textContent = online ? "온라인" : "오프라인 사용 중";
   elements.connectionDot.style.background = online ? "var(--green)" : "var(--amber)";
@@ -1082,6 +1118,10 @@ function showToast(message) {
 }
 
 function copyText(text) {
+  if (window.TireNative?.copy) {
+    window.TireNative.copy(text);
+    return Promise.resolve();
+  }
   if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(text);
   const textarea = document.createElement("textarea");
   textarea.value = text;
