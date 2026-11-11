@@ -1,16 +1,16 @@
 # Tire Receiving 설치 및 데이터 이전
 
-대상 버전: **0.1.3**
+대상 버전: **0.2.0**
 
-릴리스 태그: **`v0.1.3-mvp`**
+릴리스 태그: **`v0.2.0-mvp`**
 
-APK: **`Tire-Receiving-0.1.3-preview.apk`**
+APK: **`Tire-Receiving-0.2.0-preview.apk`**
 
 ## 지원 환경
 
 - Android 8.0(API 26) 이상
 - Package: `com.primi.tirereceiving`
-- Version: `0.1.3` / `versionCode 4`
+- Version: `0.2.0` / `versionCode 5`
 - 인터넷 연결 없이 APK의 계산·기록·백업 기능 사용 가능
 
 ## GitHub Release에서 설치
@@ -18,9 +18,9 @@ APK: **`Tire-Receiving-0.1.3-preview.apk`**
 저장소가 비공개이므로 접근 권한이 있는 GitHub 계정이 필요합니다.
 
 1. <https://github.com/Primi68/Tire-receiving-AUS/releases>를 엽니다.
-2. `v0.1.3-mvp` 릴리스를 선택합니다.
+2. `v0.2.0-mvp` 릴리스를 선택합니다.
 3. 다음 세 파일을 같은 위치에 받습니다.
-   - `Tire-Receiving-0.1.3-preview.apk`
+   - `Tire-Receiving-0.2.0-preview.apk`
    - `SHA256SUMS.txt`
    - `SIGNING-CERT-SHA256.txt`
 4. 아래 방법으로 APK 체크섬과 서명 인증서를 확인합니다.
@@ -28,7 +28,7 @@ APK: **`Tire-Receiving-0.1.3-preview.apk`**
 6. 설치가 끝나면 임시로 허용한 설치 권한을 다시 끕니다.
 7. Tire Receiving을 열어 초기 타이어가 14개인지 확인합니다.
 
-공식 `v0.1.3-mvp` Release가 아닌 workflow artifact나 출처를 확인할 수 없는 APK를 현장 기기에 설치하지 않습니다.
+공식 `v0.2.0-mvp` Release가 아닌 workflow artifact나 출처를 확인할 수 없는 APK를 현장 기기에 설치하지 않습니다.
 
 ## 파일 무결성 확인
 
@@ -41,7 +41,7 @@ sha256sum -c SHA256SUMS.txt
 macOS에서 `sha256sum`이 없다면:
 
 ```bash
-shasum -a 256 Tire-Receiving-0.1.3-preview.apk
+shasum -a 256 Tire-Receiving-0.2.0-preview.apk
 ```
 
 출력값을 `SHA256SUMS.txt`의 값과 비교합니다.
@@ -49,7 +49,7 @@ shasum -a 256 Tire-Receiving-0.1.3-preview.apk
 Android SDK Build Tools가 설치된 컴퓨터에서는 서명 인증서를 확인할 수 있습니다.
 
 ```bash
-apksigner verify --verbose --print-certs Tire-Receiving-0.1.3-preview.apk
+apksigner verify --verbose --print-certs Tire-Receiving-0.2.0-preview.apk
 ```
 
 `Signer #1 certificate SHA-256 digest`가 `SIGNING-CERT-SHA256.txt`의 지문과 같아야 합니다. 체크섬 또는 인증서 지문이 다르면 설치하지 말고 릴리스 파일을 다시 받습니다.
@@ -60,10 +60,12 @@ apksigner verify --verbose --print-certs Tire-Receiving-0.1.3-preview.apk
 
 1. 홈 화면에 **오프라인 앱** 상태가 표시되는지 확인합니다.
 2. Tire presets에서 초기 타이어 14종을 확인합니다.
-3. 검수 시작 → E80 HK Front 20" → Orange를 선택합니다.
-4. `20 × 4 × 9 + 36 = 756`과 예상 756, 차이 0이 표시되는지 확인합니다.
-5. 테스트 기록 한 건을 저장하고 Records에서 열어 수정·삭제가 되는지 확인합니다.
-6. 테스트 백업을 내보낸 뒤 파일이 생성되는지 확인합니다.
+3. 타이어 추가 → E80 HK Front 20"의 `+` → 선택한 타이어 추가를 누릅니다.
+4. 오늘 검수 전체의 대기 항목을 열고 Orange를 선택합니다.
+5. `20 × 4 × 9 + 36 = 756`에서 `20`과 `9`가 강조되고 예상 756, 차이 0이 표시되는지 확인합니다.
+6. 테스트 기록 한 건을 저장하고 날짜별 기록에서 띠 무늬와 수량을 확인합니다.
+7. 테스트 기록을 삭제했을 때 오늘 목록이 다시 대기로 돌아오는지 확인합니다.
+8. 테스트 백업을 내보낸 뒤 파일이 생성되는지 확인합니다.
 
 실제 기종별 검증 결과는 [VERIFICATION.md](VERIFICATION.md)에 기록합니다.
 
@@ -82,7 +84,7 @@ Android가 **앱이 설치되지 않았습니다** 또는 서명 충돌을 표�
 
 ## JSON 백업
 
-백업에는 현재 타이어 마스터와 모든 검수 기록이 들어갑니다.
+백업에는 현재 타이어 마스터, 날짜별 검수 목록과 모든 검수 기록이 들어갑니다.
 
 1. 앱 우측 상단의 데이터 메뉴를 엽니다.
 2. **백업 내보내기**를 선택합니다.
@@ -94,12 +96,12 @@ Android가 **앱이 설치되지 않았습니다** 또는 서명 충돌을 표�
 
 ## JSON 복원
 
-복원은 현재 타이어 마스터와 검수 기록 **전체를** 백업 내용으로 교체합니다.
+복원은 현재 타이어 마스터, 검수 목록과 검수 기록 **전체를** 백업 내용으로 교체합니다.
 
 1. 현재 상태도 필요하면 먼저 별도 JSON으로 내보냅니다.
 2. **데이터 관리 → 백업 복원**을 누릅니다.
 3. Android 문서 선택기에서 Tire Receiving이 만든 JSON을 고릅니다.
-4. 화면에 표시된 프리셋 수와 기록 수를 확인합니다.
+4. 화면에 표시된 프리셋 수, 검수 목록 건수와 기록 수를 확인합니다.
 5. 교체 확인을 누릅니다.
 6. Tire presets와 Records에서 필요한 데이터가 들어왔는지 확인합니다.
 

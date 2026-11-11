@@ -1,6 +1,7 @@
 const STORAGE_KEYS = {
   tires: "tire-receiving.tires.v1",
   records: "tire-receiving.records.v1",
+  workItems: "tire-receiving.work-items.v1",
 };
 
 const COLOR_LABELS = { blue: "Blue", orange: "Orange" };
@@ -190,6 +191,7 @@ const SEED_TIRES = [
 
 let tires = loadJson(STORAGE_KEYS.tires, null);
 let records = loadJson(STORAGE_KEYS.records, []);
+let workItems = loadJson(STORAGE_KEYS.workItems, []);
 let currentRecordFilter = "all";
 let activeRecordId = null;
 let editingRecordId = null;
@@ -198,6 +200,7 @@ let toastTimer = null;
 let toastReady = false;
 let storageWarningPending = false;
 let inspection = createEmptyInspection();
+let worklistDraftCounts = new Map();
 
 if (tires === null) {
   tires = structuredCloneSafe(SEED_TIRES);
@@ -211,6 +214,10 @@ if (!Array.isArray(records)) {
   records = [];
   persistRecords();
 }
+if (!Array.isArray(workItems)) {
+  workItems = [];
+  persistWorkItems();
+}
 const tiresWithStripes = tires.map(withNormalizedStripes);
 if (JSON.stringify(tiresWithStripes) !== JSON.stringify(tires)) {
   tires = tiresWithStripes;
@@ -220,6 +227,8 @@ if (JSON.stringify(tiresWithStripes) !== JSON.stringify(tires)) {
 const elements = {
   appMain: document.querySelector("#appMain"),
   todayLabel: document.querySelector("#todayLabel"),
+  todayItemCount: document.querySelector("#todayItemCount"),
+  todayWaitingCount: document.querySelector("#todayWaitingCount"),
   todayCompleteCount: document.querySelector("#todayCompleteCount"),
   todayAttentionCount: document.querySelector("#todayAttentionCount"),
   todayActualTotal: document.querySelector("#todayActualTotal"),
@@ -229,6 +238,11 @@ const elements = {
   tireSearch: document.querySelector("#tireSearch"),
   tireMasterList: document.querySelector("#tireMasterList"),
   sheetBackdrop: document.querySelector("#sheetBackdrop"),
+  worklistSheet: document.querySelector("#worklistSheet"),
+  worklistTireSearch: document.querySelector("#worklistTireSearch"),
+  worklistTireList: document.querySelector("#worklistTireList"),
+  worklistSelectedCount: document.querySelector("#worklistSelectedCount"),
+  addWorkItemsButton: document.querySelector("#addWorkItemsButton"),
   inspectionSheet: document.querySelector("#inspectionSheet"),
   inspectionTitle: document.querySelector("#inspectionTitle"),
   inspectionStepLabel: document.querySelector("#inspectionStepLabel"),
@@ -315,8 +329,8 @@ function bindEvents() {
   document.querySelectorAll("[data-go-view]").forEach((button) => {
     button.addEventListener("click", () => setView(button.dataset.goView));
   });
-  document.querySelectorAll("[data-start-check]").forEach((button) => button.addEventListener("click", startInspection));
-  document.querySelector("#startCheckButton").addEventListener("click", startInspection);
+  document.querySelectorAll("[data-start-check]").forEach((button) => button.addEventListener("click", openWorklistBuilder));
+  document.querySelector("#startCheckButton").addEventListener("click", openWorklistBuilder);
   document.querySelector("#addTireButton").addEventListener("click", () => openMasterEditor());
   document.querySelector("#dataMenuButton").addEventListener("click", () => openSheet(elements.dataSheet));
 
@@ -330,6 +344,10 @@ function bindEvents() {
   elements.recordSearch.addEventListener("input", renderRecords);
   elements.tireSearch.addEventListener("input", renderTireMaster);
   elements.inspectionTireSearch.addEventListener("input", renderInspectionTireList);
+  elements.worklistTireSearch.addEventListener("input", renderWorklistTireList);
+
+  elements.worklistTireList.addEventListener("click", handleWorklistTireCount);
+  elements.addWorkItemsButton.addEventListener("click", addSelectedWorkItems);
 
   document.querySelector("#recordFilters").addEventListener("click", (event) => {
     const button = event.target.closest("[data-filter]");
@@ -404,6 +422,7 @@ function bindEvents() {
   elements.deleteTireButton.addEventListener("click", deleteMasterTire);
 
   elements.recentRecords.addEventListener("click", openRecordFromEvent);
+  elements.recentRecords.addEventListener("click", handleTodayWorkItemEvent);
   elements.allRecords.addEventListener("click", openRecordFromEvent);
   elements.recordDetailBody.addEventListener("click", handleRecordDetailAction);
 
@@ -444,13 +463,28 @@ function renderToday() {
     weekday: "long",
   }).format(now);
 
-  const todayRecords = records.filter((record) => record.date === todayIso());
+  const date = todayIso();
+  const todayRecords = records.filter((record) => record.date === date);
+  const todayWorkItems = workItems.filter((item) => item.date === date).sort(sortWorkItemsOldest);
+  const linkedRecordIds = new Set(todayWorkItems.map((item) => item.recordId).filter(Boolean));
+  const unlinkedRecords = todayRecords.filter((record) => !linkedRecordIds.has(record.id)).sort(sortRecordsOldest);
+  const waitingCount = todayWorkItems.filter((item) => !records.some((record) => record.id === item.recordId)).length;
+  const totalCount = todayWorkItems.length + unlinkedRecords.length;
+  elements.todayItemCount.textContent = formatNumber(totalCount);
+  elements.todayWaitingCount.textContent = formatNumber(waitingCount);
   elements.todayCompleteCount.textContent = formatNumber(todayRecords.filter((record) => record.status === "complete").length);
   elements.todayAttentionCount.textContent = formatNumber(todayRecords.filter((record) => record.status !== "complete" || record.difference !== 0).length);
   elements.todayActualTotal.textContent = compactNumber(todayRecords.reduce((sum, record) => sum + numberValue(record.actualQty), 0));
 
-  const recent = [...records].sort(sortRecordsNewest).slice(0, 5);
-  elements.recentRecords.innerHTML = recent.length ? recent.map(recordCardTemplate).join("") : emptyStateTemplate("아직 검수 기록이 없습니다", "새 검수 시작을 눌러 첫 기록을 만들어보세요.");
+  const workRows = todayWorkItems.map((item) => {
+    const record = records.find((candidate) => candidate.id === item.recordId);
+    return record
+      ? recordCardTemplate(record, { label: workItemDisplayName(item), workItemId: item.id })
+      : waitingWorkItemTemplate(item);
+  });
+  const unlinkedRows = unlinkedRecords.map((record) => recordCardTemplate(record));
+  const rows = [...workRows, ...unlinkedRows];
+  elements.recentRecords.innerHTML = rows.length ? rows.join("") : emptyStateTemplate("오늘 검수 목록이 비어 있습니다", "타이어 추가를 눌러 오늘 확인할 목록을 먼저 만드세요.");
 }
 
 function renderRecords() {
@@ -466,7 +500,14 @@ function renderRecords() {
     })
     .sort(sortRecordsNewest);
 
-  elements.allRecords.innerHTML = filtered.length ? filtered.map(recordCardTemplate).join("") : emptyStateTemplate("조건에 맞는 기록이 없습니다", "검색어나 필터를 바꿔보세요.");
+  if (!filtered.length) {
+    elements.allRecords.innerHTML = emptyStateTemplate("조건에 맞는 기록이 없습니다", "검색어나 필터를 바꿔보세요.");
+    return;
+  }
+  const groups = Object.groupBy
+    ? Object.groupBy(filtered, (record) => record.date)
+    : filtered.reduce((result, record) => ((result[record.date] ||= []).push(record), result), {});
+  elements.allRecords.innerHTML = Object.entries(groups).map(([date, dayRecords]) => dailyRecordGroupTemplate(date, dayRecords)).join("");
 }
 
 function renderTireMaster() {
@@ -477,21 +518,65 @@ function renderTireMaster() {
     : emptyStateTemplate("타이어를 찾지 못했습니다", "검색어를 바꾸거나 새 타이어를 추가하세요.");
 }
 
-function recordCardTemplate(record) {
+function recordCardTemplate(record, options = {}) {
   const meta = [formatShortDate(record.date), record.dock ? `Dock ${record.dock}` : "", record.trailer || ""].filter(Boolean).join(" · ");
   const status = record.status === "complete"
     ? `<span class="delta-badge ${record.difference === 0 ? "is-zero" : "is-different"}">${record.difference === 0 ? "일치" : signedNumber(record.difference)}</span>`
     : `<span class="status-badge ${escapeHtml(record.status)}">${escapeHtml(STATUS_LABELS[record.status] || record.status)}</span>`;
   return `
-    <button class="record-card" type="button" data-record-id="${escapeHtml(record.id)}" data-color="${escapeHtml(record.rackColor)}">
+    <button class="record-card" type="button" data-record-id="${escapeHtml(record.id)}" ${options.workItemId ? `data-workitem-id="${escapeHtml(options.workItemId)}"` : ""} data-color="${escapeHtml(record.rackColor)}">
       <span class="record-accent"></span>
+      ${tireStripeIcon(recordStripeSource(record), "is-record")}
       <span class="record-main">
-        <strong>${escapeHtml(record.tireName)}</strong>
+        <strong>${escapeHtml(options.label || record.tireName)}</strong>
         <span class="record-meta">${escapeHtml(meta || "입고 정보 없음")} · ${escapeHtml(COLOR_LABELS[record.rackColor])} ${formatNumber(record.qtyPerRack)}/Rack</span>
-        <span class="record-formula">${escapeHtml(record.formula)}</span>
+        <span class="record-formula">${recordFormulaMarkup(record)}</span>
       </span>
       <span class="record-total"><strong>${formatNumber(record.actualQty)}</strong><small>EA</small>${status}</span>
     </button>`;
+}
+
+function waitingWorkItemTemplate(item) {
+  return `
+    <article class="record-card waiting-work-card" data-color="${escapeHtml(item.rackColor)}">
+      <span class="record-accent"></span>
+      ${tireStripeIcon(item, "is-record")}
+      <button class="waiting-work-main" type="button" data-inspect-workitem="${escapeHtml(item.id)}">
+        <strong>${escapeHtml(workItemDisplayName(item))}</strong>
+        <span class="record-meta">${escapeHtml(COLOR_LABELS[item.rackColor])} · ${formatNumber(item.qtyPerRack)}/Rack</span>
+        <span class="record-formula">예상 ${formatNumber(item.expectedQty)} EA</span>
+      </button>
+      <span class="record-total waiting-total"><span class="status-badge in_progress">대기</span><button class="remove-work-button" type="button" data-remove-workitem="${escapeHtml(item.id)}" aria-label="${escapeHtml(item.tireName)} 목록에서 제거">×</button></span>
+    </article>`;
+}
+
+function dailyRecordGroupTemplate(date, dayRecords) {
+  const completed = dayRecords.filter((record) => record.status === "complete").length;
+  const attention = dayRecords.filter((record) => record.status !== "complete" || record.difference !== 0).length;
+  const total = dayRecords.reduce((sum, record) => sum + numberValue(record.actualQty), 0);
+  return `<section class="record-day-group"><header class="record-day-header"><div><h3>${escapeHtml(formatLongDate(date))}</h3><p>${formatNumber(dayRecords.length)}건 · 완료 ${formatNumber(completed)}${attention ? ` · 확인 필요 ${formatNumber(attention)}` : ""}</p></div><strong>${formatNumber(total)} EA</strong></header><div class="record-day-rows">${dayRecords.map((record) => recordCardTemplate(record)).join("")}</div></section>`;
+}
+
+function recordStripeSource(record) {
+  if (Array.isArray(record.stripeColors)) {
+    return {
+      id: record.tireId,
+      stripeColors: record.stripeColors,
+      stripeClosePair: record.stripeClosePair,
+    };
+  }
+  return tires.find((tire) => tire.id === record.tireId) || { stripeColors: ["", "", "", ""], stripeClosePair: null };
+}
+
+function formulaMarkup(qtyPerRack, groups, extra, total) {
+  const extraMarkup = numberValue(extra) ? `<span class="formula-operator">+</span><span>${formatNumber(extra)}</span>` : "";
+  const totalMarkup = total === undefined || total === null ? "" : `<span class="formula-equals">=</span><span class="formula-total-value">${formatNumber(total)}</span>`;
+  return `<span class="formula-focus">${formatNumber(qtyPerRack)}</span><span class="formula-operator">×</span><span class="formula-fixed">4</span><span class="formula-operator">×</span><span class="formula-focus">${formatNumber(groups)}</span>${extraMarkup}${totalMarkup}`;
+}
+
+function recordFormulaMarkup(record) {
+  if (record.directTotal !== null && record.directTotal !== undefined) return `<span class="formula-direct">직접 입력 ${formatNumber(record.actualQty)}</span>`;
+  return formulaMarkup(record.qtyPerRack, record.groupCount, record.extraQty, null);
 }
 
 function tireMasterTemplate(tire) {
@@ -600,8 +685,124 @@ function emptyStateTemplate(title, description) {
     </div>`;
 }
 
-function startInspection() {
+function openWorklistBuilder() {
+  worklistDraftCounts = new Map();
+  elements.worklistTireSearch.value = "";
+  renderWorklistTireList();
+  updateWorklistSelectedCount();
+  openSheet(elements.worklistSheet);
+}
+
+function renderWorklistTireList() {
+  const query = normalize(elements.worklistTireSearch.value);
+  const filtered = tires.filter((tire) => normalize([tire.name, ...(tire.aliases || [])].join(" ")).includes(query));
+  elements.worklistTireList.innerHTML = filtered.length
+    ? filtered.map((tire) => {
+      const preset = tire.presets?.[tire.defaultColor] || Object.values(tire.presets || {})[0];
+      const count = worklistDraftCounts.get(tire.id) || 0;
+      return `<article class="worklist-choice ${count ? "is-selected" : ""}" data-worklist-tire="${escapeHtml(tire.id)}">${tireStripeIcon(tire)}<div class="worklist-choice-copy"><strong>${escapeHtml(tire.name)}</strong><small>${escapeHtml(COLOR_LABELS[tire.defaultColor] || "")} · ${preset ? `${formatNumber(preset.qtyPerRack)}/Rack` : "프리셋 없음"} · 예상 ${formatNumber(tire.expectedQty)} EA</small></div><div class="worklist-count-stepper" aria-label="${escapeHtml(tire.name)} 추가 수"><button type="button" data-worklist-count="-1" aria-label="하나 빼기">−</button><strong>${formatNumber(count)}</strong><button type="button" data-worklist-count="1" aria-label="하나 추가">+</button></div></article>`;
+    }).join("")
+    : emptyStateTemplate("타이어를 찾지 못했습니다", "검색어를 바꾸거나 프리셋에서 타이어를 추가하세요.");
+}
+
+function handleWorklistTireCount(event) {
+  const button = event.target.closest("[data-worklist-count]");
+  const row = event.target.closest("[data-worklist-tire]");
+  if (!button || !row) return;
+  const tireId = row.dataset.worklistTire;
+  const next = Math.max(0, (worklistDraftCounts.get(tireId) || 0) + Number(button.dataset.worklistCount));
+  if (next) worklistDraftCounts.set(tireId, next);
+  else worklistDraftCounts.delete(tireId);
+  renderWorklistTireList();
+  updateWorklistSelectedCount();
+}
+
+function updateWorklistSelectedCount() {
+  const count = [...worklistDraftCounts.values()].reduce((sum, value) => sum + value, 0);
+  elements.worklistSelectedCount.textContent = formatNumber(count);
+  elements.addWorkItemsButton.disabled = count === 0;
+}
+
+function addSelectedWorkItems() {
+  const date = todayIso();
+  const now = Date.now();
+  const additions = [];
+  let sequence = 0;
+  for (const tire of tires) {
+    const count = worklistDraftCounts.get(tire.id) || 0;
+    const preset = tire.presets?.[tire.defaultColor] || Object.values(tire.presets || {})[0];
+    if (!count || !preset) continue;
+    for (let index = 0; index < count; index += 1) {
+      additions.push({
+        id: createId("work"),
+        createdAt: new Date(now + sequence).toISOString(),
+        updatedAt: new Date(now + sequence).toISOString(),
+        date,
+        tireId: tire.id,
+        tireName: tire.name,
+        stripeColors: normalizeStripeColors(tire.stripeColors, tire.id),
+        stripeClosePair: normalizeStripeClosePair(tire.stripeClosePair),
+        expectedQty: numberValue(tire.expectedQty),
+        rackColor: tire.defaultColor,
+        qtyPerRack: numberValue(preset.qtyPerRack),
+        recordId: null,
+      });
+      sequence += 1;
+    }
+  }
+  if (!additions.length) return showToast("추가할 타이어를 선택해주세요.");
+  const nextWorkItems = [...workItems, ...additions];
+  if (!saveJson(STORAGE_KEYS.workItems, nextWorkItems)) return;
+  workItems = nextWorkItems;
+  closeSheets(true);
+  renderToday();
+  setView("today");
+  showToast(`오늘 검수 목록에 ${formatNumber(additions.length)}건을 추가했습니다.`);
+}
+
+function handleTodayWorkItemEvent(event) {
+  const inspectButton = event.target.closest("[data-inspect-workitem]");
+  if (inspectButton) {
+    startWorkItemInspection(inspectButton.dataset.inspectWorkitem);
+    return;
+  }
+  const removeButton = event.target.closest("[data-remove-workitem]");
+  if (!removeButton) return;
+  const item = workItems.find((candidate) => candidate.id === removeButton.dataset.removeWorkitem);
+  if (!item || item.recordId) return;
+  if (!window.confirm(`${workItemDisplayName(item)} 항목을 오늘 목록에서 제거할까요?`)) return;
+  const nextWorkItems = workItems.filter((candidate) => candidate.id !== item.id);
+  if (!saveJson(STORAGE_KEYS.workItems, nextWorkItems)) return;
+  workItems = nextWorkItems;
+  renderToday();
+  showToast("검수 목록에서 제거했습니다.");
+}
+
+function workItemDisplayName(item) {
+  const matches = workItems.filter((candidate) => candidate.date === item.date && candidate.tireId === item.tireId).sort(sortWorkItemsOldest);
+  if (matches.length <= 1) return item.tireName;
+  return `${item.tireName} · ${matches.findIndex((candidate) => candidate.id === item.id) + 1}`;
+}
+
+function startWorkItemInspection(workItemId) {
+  const item = workItems.find((candidate) => candidate.id === workItemId);
+  const tire = tires.find((candidate) => candidate.id === item?.tireId);
+  if (!item || !tire) return showToast("이 타이어 프리셋을 찾을 수 없습니다.");
+  startInspection(item.id);
+  selectInspectionTire(tire.id);
+  inspection.expectedQty = numberValue(item.expectedQty);
+  inspection.color = item.rackColor;
+  inspection.qtyPerRack = numberValue(item.qtyPerRack);
+  const derived = deriveFormula(inspection.expectedQty, inspection.qtyPerRack);
+  inspection.groupCount = derived.groups;
+  inspection.extraQty = derived.extra;
+  inspection.directTotal = null;
+  renderInspectionState();
+}
+
+function startInspection(workItemId = null) {
   inspection = createEmptyInspection();
+  inspection.workItemId = workItemId;
   editingRecordId = null;
   elements.inspectionTireSearch.value = "";
   elements.inspectionDateInput.value = todayIso();
@@ -644,6 +845,7 @@ function showTireSelection() {
   elements.inspectionStepLabel.textContent = "STEP 1 OF 2";
   elements.inspectionTitle.textContent = "타이어 선택";
   elements.inspectionBackButton.hidden = true;
+  document.querySelector("#changeTireButton").hidden = false;
   elements.tireSelectionStep.hidden = false;
   elements.inspectionForm.hidden = true;
 }
@@ -653,7 +855,8 @@ function showInspectionForm() {
   if (!tire) return showTireSelection();
   elements.inspectionStepLabel.textContent = "STEP 2 OF 2";
   elements.inspectionTitle.textContent = "수량 확인";
-  elements.inspectionBackButton.hidden = false;
+  elements.inspectionBackButton.hidden = Boolean(inspection.workItemId);
+  document.querySelector("#changeTireButton").hidden = Boolean(inspection.workItemId);
   elements.tireSelectionStep.hidden = true;
   elements.inspectionForm.hidden = false;
   elements.selectedTireName.textContent = tire.name;
@@ -730,7 +933,9 @@ function updateInspectionCalculation() {
     ? formulaText(inspection.qtyPerRack, inspection.groupCount, inspection.extraQty, calculated)
     : "랙당 적재량을 입력하세요";
 
-  elements.formulaExpression.textContent = inspection.directTotal === null ? formula : `실측 총수량 직접 입력 · ${formatNumber(actual)}`;
+  elements.formulaExpression.innerHTML = inspection.directTotal === null
+    ? formulaMarkup(inspection.qtyPerRack, inspection.groupCount, inspection.extraQty, calculated)
+    : `<span class="formula-direct">실측 총수량 직접 입력 · ${formatNumber(actual)}</span>`;
   elements.expectedTotalDisplay.textContent = formatNumber(inspection.expectedQty);
   elements.actualTotalDisplay.textContent = formatNumber(actual);
   elements.differenceDisplay.textContent = signedNumber(difference);
@@ -788,6 +993,9 @@ function saveInspection(useExpected) {
   const received = status === "partial" ? Math.max(0, numberValue(elements.receivedQtyInput.value)) : 0;
 
   const existingRecord = editingRecordId ? records.find((item) => item.id === editingRecordId) : null;
+  const linkedWorkItemId = inspection.workItemId || existingRecord?.workItemId || null;
+  const linkedWorkItem = workItems.find((item) => item.id === linkedWorkItemId);
+  const stripeSource = linkedWorkItem || tire;
   const record = {
     id: existingRecord?.id || createId("record"),
     createdAt: existingRecord?.createdAt || new Date().toISOString(),
@@ -795,6 +1003,9 @@ function saveInspection(useExpected) {
     date: elements.inspectionDateInput.value || todayIso(),
     tireId: tire.id,
     tireName: tire.name,
+    workItemId: linkedWorkItemId,
+    stripeColors: normalizeStripeColors(stripeSource.stripeColors, tire.id),
+    stripeClosePair: normalizeStripeClosePair(stripeSource.stripeClosePair),
     rackColor: inspection.color,
     qtyPerRack: inspection.qtyPerRack,
     groupCount: inspection.groupCount,
@@ -825,8 +1036,12 @@ function saveInspection(useExpected) {
   const nextRecords = existingRecord
     ? records.map((item) => item.id === record.id ? record : item)
     : [...records, record];
-  if (!saveJson(STORAGE_KEYS.records, nextRecords)) return;
+  const nextWorkItems = linkedWorkItemId
+    ? workItems.map((item) => item.id === linkedWorkItemId ? { ...item, date: record.date, recordId: record.id, updatedAt: record.updatedAt } : item)
+    : workItems;
+  if (!replaceInspectionData(nextRecords, nextWorkItems)) return;
   records = nextRecords;
+  workItems = nextWorkItems;
 
   const wasEditing = Boolean(existingRecord);
   inspection = createEmptyInspection();
@@ -967,8 +1182,7 @@ function openRecordDetail(recordId) {
 
   elements.recordDetailBody.innerHTML = `
     <div class="record-detail-summary">
-      <h3>${escapeHtml(record.tireName)}</h3>
-      <p>${escapeHtml(record.formula)}</p>
+      <div class="record-detail-title">${tireStripeIcon(recordStripeSource(record), "is-record-detail")}<div><h3>${escapeHtml(record.tireName)}</h3><p>${recordFormulaMarkup(record)}</p></div></div>
       <div class="detail-quantity-grid">
         <div><span>예상</span><strong>${formatNumber(record.expectedQty)}</strong></div>
         <div><span>실측</span><strong>${formatNumber(record.actualQty)}</strong></div>
@@ -1001,8 +1215,10 @@ function handleRecordDetailAction(event) {
   if (button.dataset.recordAction === "delete") {
     if (!window.confirm(`${record.tireName} 검수 기록을 삭제할까요?`)) return;
     const nextRecords = records.filter((item) => item.id !== record.id);
-    if (!saveJson(STORAGE_KEYS.records, nextRecords)) return;
+    const nextWorkItems = workItems.map((item) => item.recordId === record.id ? { ...item, recordId: null, updatedAt: new Date().toISOString() } : item);
+    if (!replaceInspectionData(nextRecords, nextWorkItems)) return;
     records = nextRecords;
+    workItems = nextWorkItems;
     closeSheets(true);
     renderAll();
     showToast("검수 기록을 삭제했습니다.");
@@ -1018,6 +1234,7 @@ function editInspectionRecord(record) {
   editingRecordId = record.id;
   inspection = {
     tireId: tire.id,
+    workItemId: record.workItemId || null,
     color: record.rackColor,
     qtyPerRack: numberValue(record.qtyPerRack),
     groupCount: numberValue(record.groupCount),
@@ -1042,10 +1259,11 @@ function editInspectionRecord(record) {
 function exportData() {
   const payload = {
     app: "Tire Receiving",
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     tires,
     records,
+    workItems,
   };
   const json = JSON.stringify(payload, null, 2);
   const filename = `tire-receiving-backup-${todayIso()}.json`;
@@ -1074,11 +1292,13 @@ async function restoreBackupJson(text) {
   try {
     const data = JSON.parse(text);
     if (!isValidBackup(data)) throw new Error("invalid");
-    if (!window.confirm(`프리셋 ${data.tires.length}개와 기록 ${data.records.length}개로 현재 데이터를 바꿀까요?`)) return;
+    const restoredWorkItems = Array.isArray(data.workItems) ? data.workItems : [];
+    if (!window.confirm(`프리셋 ${data.tires.length}개, 검수 목록 ${restoredWorkItems.length}건, 기록 ${data.records.length}개로 현재 데이터를 바꿀까요?`)) return;
     const restoredTires = data.tires.map(withNormalizedStripes);
-    replaceLocalData(restoredTires, data.records);
+    replaceLocalData(restoredTires, data.records, restoredWorkItems);
     tires = structuredCloneSafe(restoredTires);
     records = structuredCloneSafe(data.records);
+    workItems = structuredCloneSafe(restoredWorkItems);
     closeSheets(true);
     renderAll();
     showToast("백업 데이터를 복원했습니다.");
@@ -1127,28 +1347,47 @@ function isValidBackup(data) {
       if (!Number.isFinite(Number(record[field]))) return false;
     }
     if (typeof record.date !== "string" || typeof record.formula !== "string") return false;
+    if (record.stripeColors !== undefined && (!Array.isArray(record.stripeColors) || record.stripeColors.length !== 4 || record.stripeColors.some((color) => !STRIPE_COLORS.includes(color)))) return false;
+    if (record.stripeClosePair !== undefined && record.stripeClosePair !== null && normalizeStripeClosePair(record.stripeClosePair) !== record.stripeClosePair) return false;
+  }
+  if (data.workItems !== undefined) {
+    if (!Array.isArray(data.workItems)) return false;
+    const workItemIds = new Set();
+    for (const item of data.workItems) {
+      if (!item || typeof item.id !== "string" || !item.id || workItemIds.has(item.id)) return false;
+      if (typeof item.date !== "string" || typeof item.tireId !== "string" || typeof item.tireName !== "string") return false;
+      if (!validColors.has(item.rackColor) || !Number.isFinite(Number(item.expectedQty)) || !Number.isFinite(Number(item.qtyPerRack))) return false;
+      if (!Array.isArray(item.stripeColors) || item.stripeColors.length !== 4 || item.stripeColors.some((color) => !STRIPE_COLORS.includes(color))) return false;
+      if (item.stripeClosePair !== null && normalizeStripeClosePair(item.stripeClosePair) !== item.stripeClosePair) return false;
+      if (item.recordId !== null && item.recordId !== undefined && typeof item.recordId !== "string") return false;
+      workItemIds.add(item.id);
+    }
   }
   return true;
 }
 
-function replaceLocalData(nextTires, nextRecords) {
+function replaceLocalData(nextTires, nextRecords, nextWorkItems = []) {
   const previousTires = localStorage.getItem(STORAGE_KEYS.tires);
   const previousRecords = localStorage.getItem(STORAGE_KEYS.records);
+  const previousWorkItems = localStorage.getItem(STORAGE_KEYS.workItems);
   try {
     localStorage.setItem(STORAGE_KEYS.tires, JSON.stringify(nextTires));
     localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(nextRecords));
+    localStorage.setItem(STORAGE_KEYS.workItems, JSON.stringify(nextWorkItems));
   } catch (error) {
     if (previousTires === null) localStorage.removeItem(STORAGE_KEYS.tires);
     else localStorage.setItem(STORAGE_KEYS.tires, previousTires);
     if (previousRecords === null) localStorage.removeItem(STORAGE_KEYS.records);
     else localStorage.setItem(STORAGE_KEYS.records, previousRecords);
+    if (previousWorkItems === null) localStorage.removeItem(STORAGE_KEYS.workItems);
+    else localStorage.setItem(STORAGE_KEYS.workItems, previousWorkItems);
     throw error;
   }
 }
 
 function openSheet(sheet) {
   if (elements.sheetBackdrop.hidden) lastFocusedElement = document.activeElement;
-  [elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].forEach((item) => {
+  [elements.worklistSheet, elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].forEach((item) => {
     if (item !== sheet) item.hidden = true;
   });
   elements.sheetBackdrop.hidden = false;
@@ -1162,7 +1401,7 @@ function closeSheets(force = false) {
   if (!force && !elements.inspectionSheet.hidden && inspection.tireId) {
     if (!window.confirm("작성 중인 검수를 닫을까요? 저장하지 않은 내용은 사라집니다.")) return false;
   }
-  [elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].forEach((sheet) => { sheet.hidden = true; });
+  [elements.worklistSheet, elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].forEach((sheet) => { sheet.hidden = true; });
   elements.sheetBackdrop.hidden = true;
   document.querySelector(".app-shell").inert = false;
   document.body.classList.remove("sheet-open");
@@ -1176,7 +1415,7 @@ function closeSheets(force = false) {
 }
 
 function trapSheetFocus(event) {
-  const openSheetElement = [elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].find((sheet) => !sheet.hidden);
+  const openSheetElement = [elements.worklistSheet, elements.inspectionSheet, elements.masterSheet, elements.recordSheet, elements.dataSheet].find((sheet) => !sheet.hidden);
   if (!openSheetElement) return;
   const focusable = [...openSheetElement.querySelectorAll('button:not([hidden]):not([disabled]), input:not([hidden]):not([disabled]), select:not([hidden]):not([disabled]), textarea:not([hidden]):not([disabled]), summary, [tabindex]:not([tabindex="-1"])')]
     .filter((item) => item.offsetParent !== null);
@@ -1207,6 +1446,7 @@ function getInspectionActual() {
 function createEmptyInspection() {
   return {
     tireId: null,
+    workItemId: null,
     color: "blue",
     qtyPerRack: 0,
     groupCount: 0,
@@ -1234,6 +1474,27 @@ function persistTires() {
 
 function persistRecords() {
   return saveJson(STORAGE_KEYS.records, records);
+}
+
+function persistWorkItems() {
+  return saveJson(STORAGE_KEYS.workItems, workItems);
+}
+
+function replaceInspectionData(nextRecords, nextWorkItems) {
+  const previousRecords = localStorage.getItem(STORAGE_KEYS.records);
+  const previousWorkItems = localStorage.getItem(STORAGE_KEYS.workItems);
+  try {
+    localStorage.setItem(STORAGE_KEYS.records, JSON.stringify(nextRecords));
+    localStorage.setItem(STORAGE_KEYS.workItems, JSON.stringify(nextWorkItems));
+    return true;
+  } catch {
+    if (previousRecords === null) localStorage.removeItem(STORAGE_KEYS.records);
+    else localStorage.setItem(STORAGE_KEYS.records, previousRecords);
+    if (previousWorkItems === null) localStorage.removeItem(STORAGE_KEYS.workItems);
+    else localStorage.setItem(STORAGE_KEYS.workItems, previousWorkItems);
+    showToast("기기 저장 공간이 부족합니다. 데이터를 백업해주세요.");
+    return false;
+  }
 }
 
 function loadJson(key, fallback) {
@@ -1291,6 +1552,14 @@ function copyText(text) {
 
 function sortRecordsNewest(a, b) {
   return String(b.createdAt || b.date).localeCompare(String(a.createdAt || a.date));
+}
+
+function sortRecordsOldest(a, b) {
+  return String(a.createdAt || a.date).localeCompare(String(b.createdAt || b.date));
+}
+
+function sortWorkItemsOldest(a, b) {
+  return String(a.createdAt || a.date).localeCompare(String(b.createdAt || b.date));
 }
 
 function todayIso() {

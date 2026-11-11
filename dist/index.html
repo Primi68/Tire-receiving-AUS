@@ -25,18 +25,29 @@
       <main id="appMain" tabindex="-1">
         <section class="view is-active" data-view="today" aria-labelledby="todayTitle">
           <div class="date-line" id="todayLabel"></div>
-          <div class="hero-card">
+          <div class="hero-card worklist-hero">
             <div>
-              <p class="hero-kicker">빠른 현장 검수</p>
-              <h2 id="todayTitle">예상 수량을 불러오고<br />맞는지만 확인하세요.</h2>
+              <p class="hero-kicker">TODAY WORKLIST</p>
+              <h2 id="todayTitle">오늘 검수할 타이어</h2>
+              <p>목록을 먼저 만들고 하나씩 확인하세요.</p>
             </div>
             <button class="primary-cta" id="startCheckButton" type="button">
-              <span>새 검수 시작</span>
+              <span>타이어 추가</span>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
           </div>
 
-          <div class="stats-grid" aria-label="오늘 작업 현황">
+          <div class="stats-grid today-stats" aria-label="오늘 작업 현황">
+            <article class="stat-card">
+              <span class="stat-label">전체</span>
+              <strong id="todayItemCount">0</strong>
+              <span class="stat-unit">건</span>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">대기</span>
+              <strong id="todayWaitingCount">0</strong>
+              <span class="stat-unit">건</span>
+            </article>
             <article class="stat-card">
               <span class="stat-label">오늘 완료</span>
               <strong id="todayCompleteCount">0</strong>
@@ -56,10 +67,10 @@
 
           <div class="section-heading">
             <div>
-              <p class="eyebrow">RECENT</p>
-              <h2>최근 검수</h2>
+              <p class="eyebrow">TODAY</p>
+              <h2>오늘 검수 전체</h2>
             </div>
-            <button class="text-button" type="button" data-go-view="records">전체 보기</button>
+            <button class="text-button" type="button" data-start-check>+ 목록 추가</button>
           </div>
           <div id="recentRecords" class="record-list"></div>
         </section>
@@ -76,7 +87,7 @@
           </div>
           <div class="search-field">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>
-            <input id="recordSearch" type="search" aria-label="검수 기록 검색" placeholder="타이어, 도크, 트레일러 검색" autocomplete="off" />
+            <input id="recordSearch" type="search" aria-label="검수 기록 검색" placeholder="타이어 또는 메모 검색" autocomplete="off" />
           </div>
           <div class="filter-row" id="recordFilters" aria-label="기록 상태 필터">
             <button class="filter-chip is-active" type="button" data-filter="all" aria-pressed="true">전체</button>
@@ -127,6 +138,30 @@
     </div>
 
     <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
+
+    <section class="bottom-sheet worklist-sheet" id="worklistSheet" role="dialog" aria-modal="true" aria-labelledby="worklistSheetTitle" tabindex="-1" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-header">
+        <div>
+          <p class="eyebrow">TODAY WORKLIST</p>
+          <h2 id="worklistSheetTitle">검수 목록에 추가</h2>
+        </div>
+        <button class="icon-button" type="button" data-close-sheet aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+      </header>
+      <div class="sheet-body worklist-builder">
+        <p class="worklist-help">같은 타이어도 필요한 수만큼 추가할 수 있습니다.</p>
+        <div class="search-field sticky-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>
+          <input id="worklistTireSearch" type="search" aria-label="목록에 추가할 타이어 검색" placeholder="타이어 이름 검색" autocomplete="off" />
+        </div>
+        <div id="worklistTireList" class="selection-list worklist-selection-list"></div>
+        <div class="sheet-actions worklist-actions">
+          <button class="primary-button" id="addWorkItemsButton" type="button" disabled>선택한 타이어 추가 · <span id="worklistSelectedCount">0</span>건</button>
+        </div>
+      </div>
+    </section>
 
     <section class="bottom-sheet inspection-sheet" id="inspectionSheet" role="dialog" aria-modal="true" aria-labelledby="inspectionTitle" tabindex="-1" hidden>
       <div class="sheet-handle" aria-hidden="true"></div>
@@ -331,7 +366,7 @@
         </button>
       </header>
       <div class="sheet-body data-actions">
-        <p>이 기기에 저장된 프리셋과 검수 기록을 JSON 파일로 백업하거나 다른 기기에서 복원할 수 있습니다.</p>
+        <p>이 기기에 저장된 프리셋, 날짜별 검수 목록과 검수 기록을 JSON 파일로 백업하거나 다른 기기에서 복원할 수 있습니다.</p>
         <button class="secondary-button" id="exportDataButton" type="button">데이터 백업 파일 받기</button>
         <label class="secondary-button file-button" id="importDataButton">백업 파일에서 복원<input id="importDataInput" type="file" accept="application/json,.json" /></label>
         <p class="storage-note"><span id="connectionDot"></span><span id="connectionLabel">연결 상태 확인 중</span> · 데이터는 현재 기기에 자동 저장됩니다.</p>

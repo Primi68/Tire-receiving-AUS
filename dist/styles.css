@@ -176,6 +176,35 @@ main {
   box-shadow: 0 16px 35px rgba(11, 23, 38, 0.2);
 }
 
+.worklist-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 19px 20px;
+  border-radius: 22px;
+}
+
+.worklist-hero h2 {
+  margin: 3px 0 0;
+  font-size: 21px;
+  word-break: keep-all;
+}
+
+.worklist-hero p:not(.hero-kicker) {
+  margin: 5px 0 0;
+  color: #b8c2ce;
+  font-size: 11px;
+}
+
+.worklist-hero .primary-cta {
+  flex: 0 0 auto;
+  width: auto;
+  margin-top: 0;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
 .hero-card::after {
   position: absolute;
   right: -52px;
@@ -225,6 +254,29 @@ main {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
+}
+
+.today-stats {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.today-stats .stat-card {
+  padding: 12px 6px 11px;
+  text-align: center;
+}
+
+.today-stats .stat-card strong {
+  font-size: 20px;
+}
+
+.today-stats .stat-label {
+  font-size: 9px;
+}
+
+.today-stats .stat-unit {
+  display: block;
+  margin: 1px 0 0;
 }
 
 .stat-card {
@@ -388,10 +440,10 @@ main {
 
 .record-card {
   display: grid;
-  grid-template-columns: 9px minmax(0, 1fr) auto;
-  align-items: stretch;
-  gap: 13px;
-  padding: 14px 14px 14px 0;
+  grid-template-columns: 7px 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px 11px 0;
 }
 
 .record-accent {
@@ -430,6 +482,23 @@ main {
 .record-formula {
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
+}
+
+.record-formula .formula-focus {
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.record-formula .formula-fixed,
+.record-formula .formula-operator,
+.record-formula .formula-equals {
+  margin: 0 2px;
+  color: #89939c;
+  font-weight: 650;
+}
+
+.record-formula .formula-total-value {
+  font-weight: 800;
 }
 
 .record-total {
@@ -486,6 +555,96 @@ main {
 .status-badge.in_progress {
   color: var(--ink-soft);
   background: var(--surface-muted);
+}
+
+.waiting-work-card {
+  cursor: default;
+}
+
+.waiting-work-main {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.waiting-work-main > strong {
+  display: block;
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.waiting-total {
+  gap: 4px;
+}
+
+.remove-work-button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  color: #8b949e;
+  background: #f0f1ef;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.record-day-group + .record-day-group {
+  margin-top: 20px;
+}
+
+.record-day-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 4px;
+  border-bottom: 1px solid #cfd4d0;
+}
+
+.record-day-header h3,
+.record-day-header p {
+  margin: 0;
+}
+
+.record-day-header h3 {
+  font-size: 14px;
+}
+
+.record-day-header p {
+  margin-top: 3px;
+  color: #75808b;
+  font-size: 10px;
+}
+
+.record-day-header > strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.record-day-rows {
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 15px 15px;
+}
+
+.record-day-rows .record-card {
+  border: 0;
+  border-radius: 0;
+}
+
+.record-day-rows .record-card + .record-card {
+  border-top: 1px solid #e8e7e2;
 }
 
 .empty-state {
@@ -565,6 +724,17 @@ main {
   gap: 5px;
   padding: 9px 8px;
   border-radius: 13px;
+}
+
+.tire-stripe-icon.is-record {
+  width: 38px;
+  height: 34px;
+}
+
+.tire-stripe-icon.is-record-detail {
+  width: 48px;
+  height: 43px;
+  padding: 7px 6px;
 }
 
 .tire-stripe-line {
@@ -819,6 +989,96 @@ main {
   box-shadow: 0 6px 18px rgba(243, 241, 235, 0.95);
 }
 
+.worklist-help {
+  margin: 0 2px 12px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.worklist-builder {
+  padding-bottom: 0;
+}
+
+.worklist-selection-list {
+  padding-bottom: 92px;
+}
+
+.worklist-choice {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border: 1px solid rgba(11, 23, 38, 0.075);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.worklist-choice.is-selected {
+  border-color: #9ab7ee;
+  background: #f2f6ff;
+}
+
+.worklist-choice-copy {
+  min-width: 0;
+}
+
+.worklist-choice-copy strong,
+.worklist-choice-copy small {
+  display: block;
+}
+
+.worklist-choice-copy strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.worklist-choice-copy small {
+  margin-top: 4px;
+  color: #75808b;
+  font-size: 10px;
+}
+
+.worklist-count-stepper {
+  display: grid;
+  grid-template-columns: 36px 30px 36px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f8f8f5;
+}
+
+.worklist-count-stepper button {
+  width: 36px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.worklist-count-stepper strong {
+  text-align: center;
+  font-size: 13px;
+}
+
+.worklist-actions {
+  position: sticky;
+  z-index: 3;
+  bottom: 0;
+  margin-top: -80px;
+}
+
+.worklist-actions button:disabled {
+  border-color: #aeb5bc;
+  background: #aeb5bc;
+  cursor: default;
+}
+
 .selection-card {
   display: flex;
   align-items: center;
@@ -968,6 +1228,39 @@ fieldset {
   font-weight: 850;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
+}
+
+.formula-expression .formula-focus {
+  display: inline-grid;
+  min-width: 1.65em;
+  padding: 3px 7px 4px;
+  border-radius: 9px;
+  color: #091421;
+  background: #f3f7ff;
+  text-align: center;
+  box-shadow: 0 0 0 2px rgba(137, 181, 255, 0.28);
+}
+
+.formula-expression .formula-fixed {
+  color: #9aa6b4;
+  font-size: .82em;
+  font-weight: 700;
+}
+
+.formula-expression .formula-operator,
+.formula-expression .formula-equals {
+  margin: 0 .18em;
+  color: #8996a5;
+  font-size: .72em;
+  font-weight: 650;
+}
+
+.formula-expression .formula-total-value {
+  color: white;
+}
+
+.formula-direct {
+  font-size: .78em;
 }
 
 .expected-total-row {
@@ -1434,6 +1727,37 @@ label small {
 .record-detail-summary h3 {
   margin: 0 0 5px;
   font-size: 20px;
+}
+
+.record-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.record-detail-title > div {
+  min-width: 0;
+}
+
+.record-detail-title h3 {
+  overflow-wrap: anywhere;
+}
+
+.record-detail-title .record-formula,
+.record-detail-title p {
+  display: block;
+  margin-top: 4px;
+}
+
+.record-detail-title .formula-focus {
+  color: white;
+  font-weight: 900;
+}
+
+.record-detail-title .formula-operator,
+.record-detail-title .formula-fixed {
+  margin: 0 2px;
+  color: #8f9cab;
 }
 
 .record-detail-summary p {

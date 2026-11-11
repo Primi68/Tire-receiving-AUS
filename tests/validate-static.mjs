@@ -9,6 +9,13 @@ const activity = await readFile(new URL("../app/src/main/java/com/primi/tirerece
 const seedSource = app.match(/const SEED_TIRES = (\[[\s\S]*?\n\]);/)?.[1];
 assert.ok(seedSource, "Initial tire list must be present");
 assert.doesNotMatch(app, /inspectionTireSearch\.focus\s*\(/, "New inspections must not auto-focus search and open the keyboard");
+assert.match(app, /tire-receiving\.work-items\.v1/, "Daily work items must have a stable local-storage key");
+assert.match(app, /function formulaMarkup\(/, "Quantity formulas must use structured markup for emphasis");
+assert.match(app, /class=\"formula-focus\"/, "Rack quantity and group count must be visually emphasized");
+assert.match(app, /stripeColors: normalizeStripeColors\(stripeSource\.stripeColors/, "Saved records must snapshot tire stripe colors");
+assert.match(app, /workItems,/, "JSON backups must include daily work items");
+assert.match(html, /id=\"worklistSheet\"/, "The batch work-list builder must be present");
+assert.match(html, /id=\"todayWaitingCount\"/, "Today must show waiting work-item count");
 const seedTires = Function(`"use strict"; return ${seedSource}`)();
 
 const expectedTires = [
