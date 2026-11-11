@@ -1,19 +1,20 @@
 # Tire Receiving 검증 기준
 
-대상: **0.1.2 / versionCode 3 / `v0.1.2-mvp`**
+대상: **0.1.3 / versionCode 4 / `v0.1.3-mvp`**
 
 검증은 정적 계약, Android 빌드·lint, 서명·릴리스 파일, 실제 Android 기기 순서로 진행합니다. 명령이 문서에 있다는 사실은 통과를 뜻하지 않습니다. 각 릴리스 담당자는 실행 결과와 기기 정보를 별도로 기록해야 합니다.
 
-## 0. 0.1.2 릴리스 실행 결과
+## 0. 0.1.3 릴리스 실행 결과
 
-2026-11-10에 다음 자동 검증을 실행해 통과했습니다.
+2026-11-11에 다음 자동 검증을 실행해 통과했습니다.
 
 - `npm test`: 초기 타이어 14종의 고정 값, 4줄 무늬·점선·가까운 줄 조합, 계산식, DOM 79개, Android 오프라인 연결 확인
 - `npm run check`: `dist/app.js`, `dist/sw.js` JavaScript 구문 확인
 - Chromium 393×852: 새 검수에서 검색창 자동 포커스가 없고 14개 목록이 바로 보이는지, 전체 초기 무늬, 점선, 가까운 줄 간격, 편집 미리보기와 0.1.1 데이터 마이그레이션 확인
+- Chromium 393×852: 수량 확인 X의 확인창에서 취소하면 화면이 유지되고 확인하면 닫히는지 확인
 - `:app:assembleDebug`, `:app:lintDebug`: 성공
 - `:app:assembleRelease`, `:app:lintRelease`: 고정 키로 성공, lint 오류·경고 없음
-- `aapt`: package `com.primi.tirereceiving`, version `0.1.2`/`3`, min SDK 26, target SDK 35, 요청 권한 없음 확인
+- `aapt`: package `com.primi.tirereceiving`, version `0.1.3`/`4`, min SDK 26, target SDK 35, 요청 권한 없음 확인
 - `apksigner`: APK Signature Scheme v2 검증과 고정 인증서 SHA-256 일치 확인
 - 서명 환경 변수를 제거하면 release 빌드가 실패하는지 확인
 
@@ -35,6 +36,7 @@ npm run check
 - JavaScript가 참조하는 DOM ID가 HTML에 존재하는지
 - Android Manifest에 `INTERNET` 권한이 없는지
 - WebView DOM storage 활성화와 파일 접근 차단
+- Android WebView의 JavaScript 확인창에서 확인·취소 처리
 - `TireNative` bridge, JSON 복원, Android 뒤로 가기 진입점
 
 `npm run check`는 `dist/app.js`와 `dist/sw.js`의 JavaScript 구문을 확인합니다.
@@ -89,7 +91,7 @@ Release는 고정 서명 환경 변수가 설정된 승인 환경에서만 실�
 
 - 빌드와 lint가 오류 없이 종료되는지
 - APK package가 `com.primi.tirereceiving`인지
-- `versionName=0.1.2`, `versionCode=3`인지
+- `versionName=0.1.3`, `versionCode=4`인지
 - `minSdkVersion=26`인지
 - APK assets에 현재 `dist/` 파일이 포함되는지
 - merged manifest에 `android.permission.INTERNET`이 없는지
@@ -113,9 +115,9 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 
 ## 5. Release 파일
 
-`v0.1.2-mvp` Release에는 다음 파일이 있어야 합니다.
+`v0.1.3-mvp` Release에는 다음 파일이 있어야 합니다.
 
-- `Tire-Receiving-0.1.2-preview.apk`
+- `Tire-Receiving-0.1.3-preview.apk`
 - `SHA256SUMS.txt`
 - `SIGNING-CERT-SHA256.txt`
 
@@ -150,16 +152,20 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 - [ ] 일치, 양수 차이, 음수 차이가 구분된다.
 - [ ] 네 가지 상태와 Dock, Trailer, 메모가 저장된다.
 - [ ] 부분 입고 받은 수량과 남은 수량이 맞다.
+- [ ] 수량 확인에서 X를 누르면 저장하지 않은 검수를 닫을지 묻는 확인창이 표시된다.
+- [ ] 확인창의 취소는 수량 확인을 유지하고 확인은 검수를 닫는다.
 
 기록:
 
 - [ ] 검색과 네 가지 필터가 동작한다.
 - [ ] 기록 상세, 복사, 수정, 삭제가 동작한다.
+- [ ] 기록 삭제 확인창에서 확인·취소가 각각 동작한다.
 - [ ] Android 뒤로 가기가 열린 sheet를 먼저 닫고 Today로 돌아간다.
 
 마스터:
 
 - [ ] 타이어를 추가·수정·삭제할 수 있다.
+- [ ] 타이어 삭제 확인창에서 확인·취소가 각각 동작한다.
 - [ ] 타이어 무늬 네 줄의 색·점선과 가까운 줄 조합을 편집하고 목록에서 저장 결과를 확인할 수 있다.
 - [ ] Blue/Orange 적재량과 기본 색상을 바꿀 수 있다.
 - [ ] 현장 검수에서 수정한 적재량을 프리셋으로 저장할 수 있다.
@@ -170,6 +176,7 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 - [ ] 내보낸 JSON을 다시 선택해 복원할 수 있다.
 - [ ] 잘못된 JSON을 거절하고 기존 데이터를 유지한다.
 - [ ] 복원 확인 전에는 현재 데이터를 교체하지 않는다.
+- [ ] 복원 확인창에서 취소하면 기존 데이터를 유지한다.
 
 업데이트:
 

@@ -6,11 +6,11 @@ on:
       release_tag:
         description: Existing GitHub release tag
         required: true
-        default: v0.1.2-mvp
+        default: v0.1.3-mvp
       apk_name:
         description: Release APK filename
         required: true
-        default: Tire-Receiving-0.1.2-preview.apk
+        default: Tire-Receiving-0.1.3-preview.apk
       apk_sha256:
         description: Expected lowercase APK SHA-256
         required: true

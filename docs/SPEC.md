@@ -1,6 +1,6 @@
 # Tire Receiving 제품 명세
 
-문서 기준 버전: **0.1.2 MVP**
+문서 기준 버전: **0.1.3 MVP**
 
 ## 1. 목적
 
@@ -167,7 +167,7 @@ Trailer 입력은 저장할 때 대문자로 정규화한다. 부분 입고의 �
 ## 10. Android 범위
 
 - Package: `com.primi.tirereceiving`
-- Version: `0.1.2`, `versionCode 3`
+- Version: `0.1.3`, `versionCode 4`
 - 최소 OS: Android 8.0 / API 26
 - `dist/` 정적 파일을 APK assets로 직접 포함
 - 앱 내부 가상 HTTPS 호스트에서만 정적 파일 로드

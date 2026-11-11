@@ -65,6 +65,10 @@ assert.doesNotMatch(manifest, /android\.permission\.INTERNET/, "Offline APK must
 assert.match(activity, /setDomStorageEnabled\(true\)/, "WebView local storage must be enabled");
 assert.match(activity, /setAllowFileAccess\(false\)/, "Direct file access must stay disabled");
 assert.match(activity, /TireNative/, "Android bridge must be registered");
+assert.match(activity, /setWebChromeClient\(new WebChromeClient\(\)/, "Android WebView must install JavaScript dialog handling");
+assert.match(activity, /onJsConfirm\(/, "Android WebView must handle confirmation dialogs");
+assert.match(activity, /result\.confirm\(\)/, "Android confirmation must support approval");
+assert.match(activity, /result\.cancel\(\)/, "Android confirmation must support cancellation");
 assert.match(app, /window\.receiveBackup/, "Android backup import callback must exist");
 assert.match(app, /window\.handleAndroidBack/, "Android back handler must exist");
 

@@ -13,6 +13,12 @@
 
 최신 버전이 위에 오도록 기록합니다.
 
+### 0.1.3 — Android 확인창 수정
+
+- 수량 확인 단계에서 닫기(X)를 눌러도 반응하지 않던 Android 문제 수정
+- 저장하지 않은 검수를 닫을 때 확인·취소 선택을 Android 기본 대화상자로 표시
+- 같은 원인을 공유하던 프리셋 삭제, 기록 삭제, 백업 복원 확인창도 함께 수정
+
 ### 0.1.2 — 상세 타이어 무늬
 
 - 14개 초기 타이어의 실제 식별 무늬를 색선 순서에 맞게 확장
@@ -45,13 +51,13 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 태그 | `v0.1.2-mvp` |
-| APK | `Tire-Receiving-0.1.2-preview.apk` |
+| 태그 | `v0.1.3-mvp` |
+| APK | `Tire-Receiving-0.1.3-preview.apk` |
 | Package | `com.primi.tirereceiving` |
-| Version | `0.1.2` (`versionCode 3`) |
+| Version | `0.1.3` (`versionCode 4`) |
 | 최소 Android | Android 8.0 / API 26 |
 
-자세한 내용은 [게시된 v0.1.2-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.1.2-mvp)와 [0.1.2 릴리스 노트](docs/releases/0.1.2.md)를 참고하세요.
+자세한 내용은 [게시된 v0.1.3-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.1.3-mvp)와 [0.1.3 릴리스 노트](docs/releases/0.1.3.md)를 참고하세요.
 
 ## 바로 사용하기
 
@@ -59,7 +65,7 @@
 - 비공개 GitHub 저장소: <https://github.com/Primi68/Tire-receiving-AUS>
 - APK 설치와 업데이트: [docs/INSTALL.md](docs/INSTALL.md)
 
-게시된 `v0.1.2-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
+게시된 `v0.1.3-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
 
 ## 현장 사용 흐름
 
@@ -129,10 +135,11 @@ Release 빌드는 고정 서명 환경 변수가 필요합니다. 서명 키 관
 - [개발·빌드·서명·릴리스](docs/DEVELOPMENT.md)
 - [로컬 데이터와 개인정보](docs/PRIVACY.md)
 - [자동/수동 검증 체크리스트](docs/VERIFICATION.md)
+- [0.1.3 릴리스 노트](docs/releases/0.1.3.md)
 - [0.1.2 릴리스 노트](docs/releases/0.1.2.md)
 - [0.1.1 릴리스 노트](docs/releases/0.1.1.md)
 - [0.1.0 릴리스 노트](docs/releases/0.1.0.md)
 
 ## 현재 범위
 
-0.1.2는 한 작업자가 현장에서 빠르게 수량을 확인하고 기록하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.
+0.1.3은 한 작업자가 현장에서 빠르게 수량을 확인하고 기록하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.
