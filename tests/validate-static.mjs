@@ -16,7 +16,7 @@ const expectedTires = [
   ["bridgestone-20", 'Bridgestone 20"', 966, "orange", { blue: 25, orange: 20 }, ["yellow", "", "", ""], null],
   ["e80-hk-front-20", 'E80 HK Front 20"', 756, "orange", { orange: 20 }, ["green", "", "", ""], null],
   ["e80-hk-rear-20", 'E80 HK Rear 20"', 756, "orange", { orange: 16 }, ["green", "", "orange", ""], null],
-  ["hk-performance-front-21", 'HK Performance Front 21"', 500, "orange", { orange: 20 }, ["coral", "", "", ""], null],
+  ["hk-performance-front-21", 'HK Performance Front 21"', 500, "orange", { orange: 20 }, ["pink", "", "", ""], null],
   ["hk-performance-rear-21", 'HK Performance Rear 21"', 500, "orange", { orange: 16 }, ["white", "", "", ""], null],
   ["ct-p-20", 'CT P 20"', 420, "blue", { blue: 20 }, ["yellow", "orange", "", ""], 0],
   ["e80-continental-front-19", 'E80 Continental Front 19"', 400, "blue", { blue: 25, orange: 20 }, ["white", "orange", "", ""], null],

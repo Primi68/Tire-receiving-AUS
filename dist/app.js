@@ -5,7 +5,7 @@ const STORAGE_KEYS = {
 
 const COLOR_LABELS = { blue: "Blue", orange: "Orange" };
 const STATUS_LABELS = { complete: "완료", in_progress: "검수 중", pending: "Pending", partial: "부분 입고" };
-const STRIPE_COLORS = ["", "red", "yellow", "green", "white", "blue", "orange", "purple", "coral", "sky", "brown", "yellow-dashed", "orange-dashed"];
+const STRIPE_COLORS = ["", "red", "yellow", "green", "white", "blue", "orange", "purple", "pink", "coral", "sky", "brown", "yellow-dashed", "orange-dashed"];
 const STRIPE_LABELS = {
   "": "없음",
   red: "빨강",
@@ -15,6 +15,7 @@ const STRIPE_LABELS = {
   blue: "파랑",
   orange: "주황",
   purple: "보라",
+  pink: "핑크",
   coral: "다홍",
   sky: "하늘",
   brown: "갈색",
@@ -26,7 +27,7 @@ const DEFAULT_STRIPES = {
   "bridgestone-20": ["yellow", "", "", ""],
   "e80-hk-front-20": ["green", "", "", ""],
   "e80-hk-rear-20": ["green", "", "orange", ""],
-  "hk-performance-front-21": ["coral", "", "", ""],
+  "hk-performance-front-21": ["pink", "", "", ""],
   "hk-performance-rear-21": ["white", "", "", ""],
   "ct-p-20": ["yellow", "orange", "", ""],
   "e80-continental-front-19": ["white", "orange", "", ""],
@@ -39,6 +40,9 @@ const DEFAULT_STRIPE_CLOSE_PAIRS = { "myp-19": 0, "ct-p-20": 0, "e80-continental
 const LEGACY_011_STRIPES = {
   "myp-19": ["red", "red", "", ""],
   "bridgestone-20": ["yellow", "", "", ""],
+};
+const LEGACY_DEFAULT_STRIPES = {
+  "hk-performance-front-21": ["coral", "", "", ""],
 };
 
 const SEED_TIRES = [
@@ -87,7 +91,7 @@ const SEED_TIRES = [
     name: 'HK Performance Front 21"',
     aliases: ["HK Perf Front", "퍼포먼스 프런트"],
     expectedQty: 500,
-    stripeColors: ["coral", "", "", ""],
+    stripeColors: ["pink", "", "", ""],
     stripeClosePair: null,
     defaultColor: "orange",
     presets: { orange: { qtyPerRack: 20 } },
@@ -538,7 +542,9 @@ function withNormalizedStripes(tire) {
   const legacyColors = LEGACY_011_STRIPES[tire.id] || ["", "", "", ""];
   const hasClosePair = Object.prototype.hasOwnProperty.call(tire, "stripeClosePair");
   const upgradeFrom011 = hasStripeColors && !hasClosePair && sameStripeColors(normalizedColors, legacyColors);
-  const useCurrentMarking = hasStripeColors && !upgradeFrom011;
+  const legacyDefaultColors = LEGACY_DEFAULT_STRIPES[tire.id];
+  const upgradeLegacyDefault = hasStripeColors && legacyDefaultColors && sameStripeColors(normalizedColors, legacyDefaultColors);
+  const useCurrentMarking = hasStripeColors && !upgradeFrom011 && !upgradeLegacyDefault;
   return {
     ...tire,
     stripeColors: useCurrentMarking ? normalizedColors : normalizeStripeColors(null, tire.id),

@@ -63,7 +63,7 @@ Unloading schedule 확인은 현장에 내려가기 전에 예상 타이어를 �
 
 묶음 수와 추가 수량은 별도 고정값으로 저장하지 않고 현재 예상 수량과 랙당 적재량에서 다시 계산한다. 따라서 예상 수량이나 적재량을 바꾸면 계산식 미리보기도 함께 갱신된다.
 
-타이어 식별용 무늬는 랙 색상 프리셋과 별도로 관리한다. `stripeColors`는 위에서 아래 순서의 정확히 4개 값이며 각 값은 없음(`""`), `red`, `yellow`, `green`, `white`, `blue`, `orange`, `purple`, `coral`, `sky`, `brown`, `yellow-dashed`, `orange-dashed` 중 하나다. 점선 토큰은 색상과 선 형태를 함께 나타낸다.
+타이어 식별용 무늬는 랙 색상 프리셋과 별도로 관리한다. `stripeColors`는 위에서 아래 순서의 정확히 4개 값이며 각 값은 없음(`""`), `red`, `yellow`, `green`, `white`, `blue`, `orange`, `purple`, `pink`, `coral`, `sky`, `brown`, `yellow-dashed`, `orange-dashed` 중 하나다. 점선 토큰은 색상과 선 형태를 함께 나타낸다. `coral`은 기존 사용자 데이터와 백업 호환을 위해 계속 허용한다.
 
 `stripeClosePair`는 가까이 표시할 인접 줄 한 쌍을 저장한다. `null`은 기본 간격, `0`은 1·2번째 줄, `1`은 2·3번째 줄, `2`는 3·4번째 줄이다.
 
@@ -77,7 +77,7 @@ Unloading schedule 확인은 현장에 내려가기 전에 예상 타이어를 �
 | 2 | Bridgestone 20" | 브리지스톤, 브릿지스톤 | Orange | Orange 20, Blue 25 | 966 | 노랑·없음·없음·없음 | `20 × 4 × 12 + 6` |
 | 3 | E80 HK Front 20" | 한국 프런트, 한국 front, HK F | Orange | Orange 20 | 756 | 초록·없음·없음·없음 | `20 × 4 × 9 + 36` |
 | 4 | E80 HK Rear 20" | 한국 레어, 한국 rear, HK R | Orange | Orange 16 | 756 | 초록·없음·주황·없음 | `16 × 4 × 11 + 52` |
-| 5 | HK Performance Front 21" | HK Perf Front, 퍼포먼스 프런트 | Orange | Orange 20 | 500 | 다홍·없음·없음·없음 | `20 × 4 × 6 + 20` |
+| 5 | HK Performance Front 21" | HK Perf Front, 퍼포먼스 프런트 | Orange | Orange 20 | 500 | 핑크·없음·없음·없음 | `20 × 4 × 6 + 20` |
 | 6 | HK Performance Rear 21" | HK Perf Rear, 퍼포먼스 레어 | Orange | Orange 16 | 500 | 흰색·없음·없음·없음 | `16 × 4 × 7 + 52` |
 | 7 | CT P 20" | CTP, CT P | Blue | Blue 20 | 420 | 노랑·주황·없음·없음, 1·2 가까이 | `20 × 4 × 5 + 20` |
 | 8 | E80 Continental Front 19" | E80 Conti Front, 콘티 프런트 | Blue | Blue 25, Orange 20 | 400 | 흰색·주황·없음·없음 | `25 × 4 × 4` |

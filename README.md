@@ -22,7 +22,7 @@
 ### 0.1.2 — 상세 타이어 무늬
 
 - 14개 초기 타이어의 실제 식별 무늬를 색선 순서에 맞게 확장
-- 다홍·하늘·갈색과 노랑·주황 점선 추가
+- 핑크·다홍·하늘·갈색과 노랑·주황 점선 지원
 - MYP, CT P, E80 Continental Rear, W68 Front의 가까운 줄 간격 표현
 - Tire presets에서 네 줄 색상과 가까운 줄 조합을 수정 가능
 - 기존 0.1.1 사용자 무늬는 직접 수정된 값이면 유지하고, 초기값 그대로인 항목만 새 기본 무늬로 보완
@@ -91,7 +91,7 @@
 | Bridgestone 20" | 노랑·—·—·— | Orange 20/rack | `20 × 4 × 12 + 6` | 966 | Blue 25/rack |
 | E80 HK Front 20" | 초록·—·—·— | Orange 20/rack | `20 × 4 × 9 + 36` | 756 | — |
 | E80 HK Rear 20" | 초록·—·주황·— | Orange 16/rack | `16 × 4 × 11 + 52` | 756 | — |
-| HK Performance Front 21" | 다홍·—·—·— | Orange 20/rack | `20 × 4 × 6 + 20` | 500 | — |
+| HK Performance Front 21" | 핑크·—·—·— | Orange 20/rack | `20 × 4 × 6 + 20` | 500 | — |
 | HK Performance Rear 21" | 흰색·—·—·— | Orange 16/rack | `16 × 4 × 7 + 52` | 500 | — |
 | CT P 20" | 노랑·주황·—·—, 1·2 가까이 | Blue 20/rack | `20 × 4 × 5 + 20` | 420 | — |
 | E80 Continental Front 19" | 흰색·주황·—·— | Blue 25/rack | `25 × 4 × 4` | 400 | Orange 20/rack |
