@@ -13,6 +13,15 @@
 
 최신 버전이 위에 오도록 기록합니다.
 
+### 0.2.1 — 간결한 오늘 화면과 누적 통계
+
+- 큰 TODAY WORKLIST 안내 카드와 다섯 개 요약 카드를 제거해 오늘 목록 공간 확보
+- 오늘 진행 상황을 `검수 6 / 8건 · 대기 2건` 한 줄로 표시
+- 수량 차이가 있을 때만 `수량 차이 N건` 경고 배지 표시
+- 우측 상단 메뉴를 **검수 통계 · 데이터**로 확장
+- 누적 검수 기록, 실제 리시빙 일수, 누적 실측과 오늘 실측 표시
+- 실측 수량은 `5,850 EA`처럼 축약하지 않고 정확한 숫자로 표시
+
 ### 0.2.0 — 오늘 검수 목록과 일별 기록
 
 - 타이어를 한 건씩 시작하는 대신 오늘 검수할 목록을 먼저 구성
@@ -64,13 +73,13 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 태그 | `v0.2.0-mvp` |
-| APK | `Tire-Receiving-0.2.0-preview.apk` |
+| 태그 | `v0.2.1-mvp` |
+| APK | `Tire-Receiving-0.2.1-preview.apk` |
 | Package | `com.primi.tirereceiving` |
-| Version | `0.2.0` (`versionCode 5`) |
+| Version | `0.2.1` (`versionCode 6`) |
 | 최소 Android | Android 8.0 / API 26 |
 
-자세한 내용은 [게시된 v0.2.0-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.2.0-mvp)와 [0.2.0 릴리스 노트](docs/releases/0.2.0.md)를 참고하세요.
+자세한 내용은 [게시된 v0.2.1-mvp Release](https://github.com/Primi68/Tire-receiving-AUS/releases/tag/v0.2.1-mvp)와 [0.2.1 릴리스 노트](docs/releases/0.2.1.md)를 참고하세요.
 
 ## 바로 사용하기
 
@@ -78,7 +87,7 @@
 - 비공개 GitHub 저장소: <https://github.com/Primi68/Tire-receiving-AUS>
 - APK 설치와 업데이트: [docs/INSTALL.md](docs/INSTALL.md)
 
-게시된 `v0.2.0-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
+게시된 `v0.2.1-mvp` 릴리스에서 APK, `SHA256SUMS.txt`, `SIGNING-CERT-SHA256.txt`를 함께 내려받습니다. APK를 설치하기 전에 체크섬과 서명 인증서 지문을 확인하세요.
 
 ## 현장 사용 흐름
 
@@ -150,6 +159,7 @@ Release 빌드는 고정 서명 환경 변수가 필요합니다. 서명 키 관
 - [개발·빌드·서명·릴리스](docs/DEVELOPMENT.md)
 - [로컬 데이터와 개인정보](docs/PRIVACY.md)
 - [자동/수동 검증 체크리스트](docs/VERIFICATION.md)
+- [0.2.1 릴리스 노트](docs/releases/0.2.1.md)
 - [0.2.0 릴리스 노트](docs/releases/0.2.0.md)
 - [0.1.3 릴리스 노트](docs/releases/0.1.3.md)
 - [0.1.2 릴리스 노트](docs/releases/0.1.2.md)
@@ -158,4 +168,4 @@ Release 빌드는 고정 서명 환경 변수가 필요합니다. 서명 키 관
 
 ## 현재 범위
 
-0.2.0은 한 작업자가 오늘 목록을 먼저 만들고 현장에서 빠르게 수량을 확인하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.
+0.2.1은 한 작업자가 오늘 목록을 먼저 만들고 현장에서 빠르게 수량을 확인하는 MVP입니다. Unloading schedule 연동, 계정 로그인, 여러 기기 동기화, 서버 데이터베이스, 카메라/OCR, 알림은 포함하지 않습니다.

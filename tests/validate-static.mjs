@@ -15,7 +15,9 @@ assert.match(app, /class=\"formula-focus\"/, "Rack quantity and group count must
 assert.match(app, /stripeColors: normalizeStripeColors\(stripeSource\.stripeColors/, "Saved records must snapshot tire stripe colors");
 assert.match(app, /workItems,/, "JSON backups must include daily work items");
 assert.match(html, /id=\"worklistSheet\"/, "The batch work-list builder must be present");
-assert.match(html, /id=\"todayWaitingCount\"/, "Today must show waiting work-item count");
+assert.match(html, /id=\"todayProgressText\"/, "Today must show inspection progress without a large dashboard");
+assert.match(html, /id=\"statsActualTotal\"/, "The data menu must show cumulative receiving quantity");
+assert.match(app, /formatNumber\(actualTotal\)/, "Cumulative receiving quantity must keep exact thousands-separated digits");
 const seedTires = Function(`"use strict"; return ${seedSource}`)();
 
 const expectedTires = [

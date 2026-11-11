@@ -227,11 +227,9 @@ if (JSON.stringify(tiresWithStripes) !== JSON.stringify(tires)) {
 const elements = {
   appMain: document.querySelector("#appMain"),
   todayLabel: document.querySelector("#todayLabel"),
-  todayItemCount: document.querySelector("#todayItemCount"),
-  todayWaitingCount: document.querySelector("#todayWaitingCount"),
-  todayCompleteCount: document.querySelector("#todayCompleteCount"),
-  todayAttentionCount: document.querySelector("#todayAttentionCount"),
-  todayActualTotal: document.querySelector("#todayActualTotal"),
+  todayProgressText: document.querySelector("#todayProgressText"),
+  todayWaitingText: document.querySelector("#todayWaitingText"),
+  todayAttentionBadge: document.querySelector("#todayAttentionBadge"),
   recentRecords: document.querySelector("#recentRecords"),
   allRecords: document.querySelector("#allRecords"),
   recordSearch: document.querySelector("#recordSearch"),
@@ -300,6 +298,11 @@ const elements = {
   dataSheet: document.querySelector("#dataSheet"),
   importDataButton: document.querySelector("#importDataButton"),
   importDataInput: document.querySelector("#importDataInput"),
+  statsRecordCount: document.querySelector("#statsRecordCount"),
+  statsReceivingDays: document.querySelector("#statsReceivingDays"),
+  statsActualTotal: document.querySelector("#statsActualTotal"),
+  statsTodaySummary: document.querySelector("#statsTodaySummary"),
+  statsUpdatedLabel: document.querySelector("#statsUpdatedLabel"),
   connectionDot: document.querySelector("#connectionDot"),
   connectionLabel: document.querySelector("#connectionLabel"),
   toast: document.querySelector("#toast"),
@@ -441,6 +444,7 @@ function renderAll() {
   renderToday();
   renderRecords();
   renderTireMaster();
+  renderInspectionStats();
 }
 
 function setView(viewName) {
@@ -470,11 +474,12 @@ function renderToday() {
   const unlinkedRecords = todayRecords.filter((record) => !linkedRecordIds.has(record.id)).sort(sortRecordsOldest);
   const waitingCount = todayWorkItems.filter((item) => !records.some((record) => record.id === item.recordId)).length;
   const totalCount = todayWorkItems.length + unlinkedRecords.length;
-  elements.todayItemCount.textContent = formatNumber(totalCount);
-  elements.todayWaitingCount.textContent = formatNumber(waitingCount);
-  elements.todayCompleteCount.textContent = formatNumber(todayRecords.filter((record) => record.status === "complete").length);
-  elements.todayAttentionCount.textContent = formatNumber(todayRecords.filter((record) => record.status !== "complete" || record.difference !== 0).length);
-  elements.todayActualTotal.textContent = compactNumber(todayRecords.reduce((sum, record) => sum + numberValue(record.actualQty), 0));
+  const inspectedCount = todayRecords.length;
+  const attentionCount = todayRecords.filter((record) => record.difference !== 0).length;
+  elements.todayProgressText.textContent = `${formatNumber(inspectedCount)} / ${formatNumber(totalCount)}건 검수`;
+  elements.todayWaitingText.textContent = `대기 ${formatNumber(waitingCount)}건`;
+  elements.todayAttentionBadge.textContent = `수량 차이 ${formatNumber(attentionCount)}건`;
+  elements.todayAttentionBadge.hidden = attentionCount === 0;
 
   const workRows = todayWorkItems.map((item) => {
     const record = records.find((candidate) => candidate.id === item.recordId);
@@ -485,6 +490,18 @@ function renderToday() {
   const unlinkedRows = unlinkedRecords.map((record) => recordCardTemplate(record));
   const rows = [...workRows, ...unlinkedRows];
   elements.recentRecords.innerHTML = rows.length ? rows.join("") : emptyStateTemplate("오늘 검수 목록이 비어 있습니다", "타이어 추가를 눌러 오늘 확인할 목록을 먼저 만드세요.");
+}
+
+function renderInspectionStats() {
+  const receivingDays = new Set(records.map((record) => record.date).filter(Boolean)).size;
+  const actualTotal = records.reduce((sum, record) => sum + numberValue(record.actualQty), 0);
+  const todayRecords = records.filter((record) => record.date === todayIso());
+  const todayActual = todayRecords.reduce((sum, record) => sum + numberValue(record.actualQty), 0);
+  elements.statsRecordCount.textContent = formatNumber(records.length);
+  elements.statsReceivingDays.textContent = formatNumber(receivingDays);
+  elements.statsActualTotal.textContent = formatNumber(actualTotal);
+  elements.statsTodaySummary.textContent = `검수 ${formatNumber(todayRecords.length)}건 · 실측 ${formatNumber(todayActual)} EA`;
+  elements.statsUpdatedLabel.textContent = `${formatShortDate(todayIso())} 기준`;
 }
 
 function renderRecords() {
@@ -1580,12 +1597,6 @@ function formatLongDate(date) {
 
 function formatNumber(value) {
   return new Intl.NumberFormat("ko-KR").format(numberValue(value));
-}
-
-function compactNumber(value) {
-  const number = numberValue(value);
-  if (number < 10000) return formatNumber(number);
-  return new Intl.NumberFormat("ko-KR", { notation: "compact", maximumFractionDigits: 1 }).format(number);
 }
 
 function signedNumber(value) {

@@ -1,16 +1,16 @@
 # Tire Receiving 설치 및 데이터 이전
 
-대상 버전: **0.2.0**
+대상 버전: **0.2.1**
 
-릴리스 태그: **`v0.2.0-mvp`**
+릴리스 태그: **`v0.2.1-mvp`**
 
-APK: **`Tire-Receiving-0.2.0-preview.apk`**
+APK: **`Tire-Receiving-0.2.1-preview.apk`**
 
 ## 지원 환경
 
 - Android 8.0(API 26) 이상
 - Package: `com.primi.tirereceiving`
-- Version: `0.2.0` / `versionCode 5`
+- Version: `0.2.1` / `versionCode 6`
 - 인터넷 연결 없이 APK의 계산·기록·백업 기능 사용 가능
 
 ## GitHub Release에서 설치
@@ -18,9 +18,9 @@ APK: **`Tire-Receiving-0.2.0-preview.apk`**
 저장소가 비공개이므로 접근 권한이 있는 GitHub 계정이 필요합니다.
 
 1. <https://github.com/Primi68/Tire-receiving-AUS/releases>를 엽니다.
-2. `v0.2.0-mvp` 릴리스를 선택합니다.
+2. `v0.2.1-mvp` 릴리스를 선택합니다.
 3. 다음 세 파일을 같은 위치에 받습니다.
-   - `Tire-Receiving-0.2.0-preview.apk`
+   - `Tire-Receiving-0.2.1-preview.apk`
    - `SHA256SUMS.txt`
    - `SIGNING-CERT-SHA256.txt`
 4. 아래 방법으로 APK 체크섬과 서명 인증서를 확인합니다.
@@ -28,7 +28,7 @@ APK: **`Tire-Receiving-0.2.0-preview.apk`**
 6. 설치가 끝나면 임시로 허용한 설치 권한을 다시 끕니다.
 7. Tire Receiving을 열어 초기 타이어가 14개인지 확인합니다.
 
-공식 `v0.2.0-mvp` Release가 아닌 workflow artifact나 출처를 확인할 수 없는 APK를 현장 기기에 설치하지 않습니다.
+공식 `v0.2.1-mvp` Release가 아닌 workflow artifact나 출처를 확인할 수 없는 APK를 현장 기기에 설치하지 않습니다.
 
 ## 파일 무결성 확인
 
@@ -41,7 +41,7 @@ sha256sum -c SHA256SUMS.txt
 macOS에서 `sha256sum`이 없다면:
 
 ```bash
-shasum -a 256 Tire-Receiving-0.2.0-preview.apk
+shasum -a 256 Tire-Receiving-0.2.1-preview.apk
 ```
 
 출력값을 `SHA256SUMS.txt`의 값과 비교합니다.
@@ -49,7 +49,7 @@ shasum -a 256 Tire-Receiving-0.2.0-preview.apk
 Android SDK Build Tools가 설치된 컴퓨터에서는 서명 인증서를 확인할 수 있습니다.
 
 ```bash
-apksigner verify --verbose --print-certs Tire-Receiving-0.2.0-preview.apk
+apksigner verify --verbose --print-certs Tire-Receiving-0.2.1-preview.apk
 ```
 
 `Signer #1 certificate SHA-256 digest`가 `SIGNING-CERT-SHA256.txt`의 지문과 같아야 합니다. 체크섬 또는 인증서 지문이 다르면 설치하지 말고 릴리스 파일을 다시 받습니다.

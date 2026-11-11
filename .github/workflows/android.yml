@@ -53,13 +53,13 @@ jobs:
       - name: Name APK and checksum
         run: |
           mkdir -p dist-release
-          cp app/build/outputs/apk/release/app-release.apk dist-release/Tire-Receiving-0.2.0-preview.apk
+          cp app/build/outputs/apk/release/app-release.apk dist-release/Tire-Receiving-0.2.1-preview.apk
           cp .github/release-certificate.sha256 dist-release/SIGNING-CERT-SHA256.txt
           cd dist-release
           sha256sum *.apk > SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: Tire-Receiving-0.2.0-preview
+          name: Tire-Receiving-0.2.1-preview
           path: dist-release/
       - uses: actions/upload-artifact@v4
         if: always()

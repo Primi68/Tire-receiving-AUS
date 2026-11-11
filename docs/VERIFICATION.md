@@ -1,22 +1,23 @@
 # Tire Receiving 검증 기준
 
-대상: **0.2.0 / versionCode 5 / `v0.2.0-mvp`**
+대상: **0.2.1 / versionCode 6 / `v0.2.1-mvp`**
 
 검증은 정적 계약, Android 빌드·lint, 서명·릴리스 파일, 실제 Android 기기 순서로 진행합니다. 명령이 문서에 있다는 사실은 통과를 뜻하지 않습니다. 각 릴리스 담당자는 실행 결과와 기기 정보를 별도로 기록해야 합니다.
 
-## 0. 0.2.0 릴리스 실행 결과
+## 0. 0.2.1 릴리스 실행 결과
 
 2026-11-11에 다음 자동 검증을 실행해 통과했습니다.
 
-- `npm test`: 초기 타이어 14종의 고정 값, 4줄 무늬·점선·가까운 줄 조합, 계산식, DOM 86개, Android 오프라인 연결 확인
+- `npm test`: 초기 타이어 14종의 고정 값, 4줄 무늬·점선·가까운 줄 조합, 계산식, DOM 89개, Android 오프라인 연결 확인
 - `npm run check`: `dist/app.js`, `dist/sw.js` JavaScript 구문 확인
-- Chromium 393×852: 오늘 목록 3건 생성, 동일 타이어 중복 번호, 검색창 자동 포커스 없음, 대기 항목 검수와 로컬 저장 확인
-- Chromium 393×852: 수식의 랙당 적재량·묶음 수 강조, 날짜별 기록 그룹, 기록 띠 스냅샷 확인
+- Chromium 393×852: 큰 안내 카드 제거, 오늘 검수 진행률·대기 건수와 목록 공간 확인
+- Chromium 393×852: 우측 메뉴의 누적 검수 기록, 리시빙 일수, 누적·오늘 실측 표시 확인
+- Chromium 393×852: 누적 검수 6건, 리시빙 3일, 누적 실측 5,850 EA의 정확한 숫자 표시 확인
 - Chromium 393×852: 완료 기록 삭제 후 목록 대기 복귀, HK Performance Front 핑크 띠, 0.1.x 백업 호환 확인
 - Chromium 393×852: 수량 확인 X의 확인창에서 취소하면 화면이 유지되고 확인하면 닫히는지 확인
 - `:app:assembleDebug`, `:app:lintDebug`: 성공
 - `:app:assembleRelease`, `:app:lintRelease`: 고정 키로 성공, lint 오류·경고 없음
-- `aapt`: package `com.primi.tirereceiving`, version `0.2.0`/`5`, min SDK 26, target SDK 35, 요청 권한 없음 확인
+- `aapt`: package `com.primi.tirereceiving`, version `0.2.1`/`6`, min SDK 26, target SDK 35, 요청 권한 없음 확인
 - `apksigner`: APK Signature Scheme v2 검증과 고정 인증서 SHA-256 일치 확인
 - 서명 환경 변수를 제거하면 release 빌드가 실패하는지 확인
 
@@ -93,7 +94,7 @@ Release는 고정 서명 환경 변수가 설정된 승인 환경에서만 실�
 
 - 빌드와 lint가 오류 없이 종료되는지
 - APK package가 `com.primi.tirereceiving`인지
-- `versionName=0.2.0`, `versionCode=5`인지
+- `versionName=0.2.1`, `versionCode=6`인지
 - `minSdkVersion=26`인지
 - APK assets에 현재 `dist/` 파일이 포함되는지
 - merged manifest에 `android.permission.INTERNET`이 없는지
@@ -117,9 +118,9 @@ apksigner verify --verbose --print-certs app/build/outputs/apk/release/app-relea
 
 ## 5. Release 파일
 
-`v0.2.0-mvp` Release에는 다음 파일이 있어야 합니다.
+`v0.2.1-mvp` Release에는 다음 파일이 있어야 합니다.
 
-- `Tire-Receiving-0.2.0-preview.apk`
+- `Tire-Receiving-0.2.1-preview.apk`
 - `SHA256SUMS.txt`
 - `SIGNING-CERT-SHA256.txt`
 

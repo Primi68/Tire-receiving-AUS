@@ -121,15 +121,15 @@ Debug APK는 개발 확인용이며 GitHub Release에 배포하지 않습니다.
 5. `docs/releases/<version>.md`
 6. 필요한 경우 웹 service worker cache 이름
 
-0.2.0 기준:
+0.2.1 기준:
 
 | 항목 | 값 |
 | --- | --- |
 | Package | `com.primi.tirereceiving` |
-| Version name | `0.2.0` |
-| Version code | `5` |
-| 릴리스 태그 | `v0.2.0-mvp` |
-| APK | `Tire-Receiving-0.2.0-preview.apk` |
+| Version name | `0.2.1` |
+| Version code | `6` |
+| 릴리스 태그 | `v0.2.1-mvp` |
+| APK | `Tire-Receiving-0.2.1-preview.apk` |
 
 ## 고정 release 서명
 
@@ -182,17 +182,17 @@ base64 < /absolute/path/to/tire-receiving-release.keystore | tr -d '\n'
 
 ## Release 빌드와 게시
 
-0.2.0 릴리스 절차:
+0.2.1 릴리스 절차:
 
 1. main 브랜치에서 버전과 릴리스 노트를 최종 확인합니다.
 2. `npm test`, `npm run check`, Android release build와 lint를 실행합니다.
 3. 고정 인증서 지문 검증을 통과한 APK만 사용합니다.
-4. APK 이름을 `Tire-Receiving-0.2.0-preview.apk`로 정합니다.
+4. APK 이름을 `Tire-Receiving-0.2.1-preview.apk`로 정합니다.
 5. APK SHA-256을 `SHA256SUMS.txt`에 기록합니다.
 6. 고정 인증서 지문 파일 `SIGNING-CERT-SHA256.txt`를 함께 준비합니다.
 7. GitHub Actions의 **Android MVP** workflow를 `workflow_dispatch`로 실행합니다.
 8. 서명 빌드 artifact와 Android lint report를 확인합니다.
-9. `v0.2.0-mvp` 태그와 GitHub Release에 APK, 체크섬, 인증서 지문, [릴리스 노트](releases/0.2.0.md)를 게시합니다.
+9. `v0.2.1-mvp` 태그와 GitHub Release에 APK, 체크섬, 인증서 지문, [릴리스 노트](releases/0.2.1.md)를 게시합니다.
 10. Release에서 다시 내려받은 APK의 체크섬과 서명을 확인합니다.
 11. 지원 Android 기기의 수동 체크리스트 결과를 [VERIFICATION.md](VERIFICATION.md)에 기록합니다.
 
